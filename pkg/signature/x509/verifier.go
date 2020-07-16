@@ -4,7 +4,9 @@ import (
 	"bytes"
 	"crypto"
 	"crypto/x509"
+	"encoding/json"
 	"errors"
+	"strings"
 
 	"github.com/docker/libtrust"
 	"github.com/notaryproject/nv2/pkg/signature"
@@ -68,6 +70,29 @@ func (v *verifier) Verify(content []byte, sig signature.Signature) error {
 	if err != nil {
 		return err
 	}
+	if err := key.Verify(bytes.NewReader(content), sig.Algorithm, sig.Signature); err != nil {
+		return err
+	}
 
-	return key.Verify(bytes.NewReader(content), sig.Algorithm, sig.Signature)
+	return verifyReferences(content, cert)
+}
+
+func verifyReferences(raw []byte, cert *x509.Certificate) error {
+	var content signature.Content
+	if err := json.Unmarshal(raw, &content); err != nil {
+		return err
+	}
+	roots := x509.NewCertPool()
+	roots.AddCert(cert)
+	for _, manifest := range content.Manifests {
+		for _, reference := range manifest.References {
+			if _, err := cert.Verify(x509.VerifyOptions{
+				DNSName: strings.SplitN(reference, "/", 2)[0],
+				Roots:   roots,
+			}); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
 }
