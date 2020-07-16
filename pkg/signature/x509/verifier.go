@@ -29,6 +29,10 @@ func NewVerifier(roots *x509.CertPool) (signature.Verifier, error) {
 	}, nil
 }
 
+func (v *verifier) Type() string {
+	return Type
+}
+
 func (v *verifier) Verify(content []byte, sig signature.Signature) error {
 	if sig.Type != Type {
 		return signature.ErrInvalidSignatureType
