@@ -44,7 +44,7 @@ var signCommand = &cli.Command{
 			Usage:   "expire duration",
 		},
 		&cli.StringSliceFlag{
-			Name:    "references",
+			Name:    "reference",
 			Aliases: []string{"r"},
 			Usage:   "original references",
 		},
@@ -104,7 +104,7 @@ func prepareContentForSigning(ctx *cli.Context) (signature.Content, error) {
 		return signature.Content{}, err
 	}
 
-	manifest.References = ctx.StringSlice("references")
+	manifest.References = ctx.StringSlice("reference")
 	now := time.Now()
 	nowUnix := now.Unix()
 	content := signature.Content{
