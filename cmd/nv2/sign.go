@@ -108,13 +108,13 @@ func prepareContentForSigning(ctx *cli.Context) (signature.Content, error) {
 	now := time.Now()
 	nowUnix := now.Unix()
 	content := signature.Content{
-		NotBefore: nowUnix,
-		IssuedAt:  nowUnix,
+		IssuedAt: nowUnix,
 		Manifests: []signature.Manifest{
 			manifest,
 		},
 	}
 	if expiry := ctx.Duration("expiry"); expiry != 0 {
+		content.NotBefore = nowUnix
 		content.Expiration = now.Add(expiry).Unix()
 	}
 
