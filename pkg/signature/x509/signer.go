@@ -4,11 +4,10 @@ import (
 	"bytes"
 	"crypto"
 	"crypto/x509"
-	"encoding/pem"
 	"errors"
-	"io/ioutil"
 
 	"github.com/docker/libtrust"
+	cryptoutil "github.com/notaryproject/nv2/internal/crypto"
 	"github.com/notaryproject/nv2/pkg/signature"
 )
 
@@ -21,37 +20,14 @@ type signer struct {
 
 // NewSignerFromFiles creates a signer from files
 func NewSignerFromFiles(keyPath, certPath string) (signature.Signer, error) {
-	// Read key
-	keyBytes, err := ioutil.ReadFile(keyPath)
+	key, err := cryptoutil.ReadPrivateKeyFile(keyPath)
 	if err != nil {
 		return nil, err
 	}
-	key, err := libtrust.UnmarshalPrivateKeyPEM(keyBytes)
+	certs, err := cryptoutil.ReadCertificateFile(certPath)
 	if err != nil {
 		return nil, err
 	}
-
-	// Read certificate
-	certBytes, err := ioutil.ReadFile(certPath)
-	if err != nil {
-		return nil, err
-	}
-	var (
-		certs     []*x509.Certificate
-		certBlock *pem.Block
-	)
-	for {
-		certBlock, certBytes = pem.Decode(certBytes)
-		if certBlock == nil {
-			break
-		}
-		cert, err := x509.ParseCertificate(certBlock.Bytes)
-		if err != nil {
-			return nil, err
-		}
-		certs = append(certs, cert)
-	}
-
 	return NewSigner(key, certs)
 }
 
