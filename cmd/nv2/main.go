@@ -9,8 +9,9 @@ import (
 
 func main() {
 	app := &cli.App{
-		Name:  "nv2",
-		Usage: "Notary V2 - Prototype",
+		Name:    "nv2",
+		Usage:   "Notary V2 - Prototype",
+		Version: "0.1.0",
 		Authors: []*cli.Author{
 			{
 				Name:  "Shiwei Zhang",
