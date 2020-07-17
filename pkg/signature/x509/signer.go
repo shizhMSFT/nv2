@@ -13,9 +13,10 @@ import (
 )
 
 type signer struct {
-	key   libtrust.PrivateKey
-	certs [][]byte
-	hash  crypto.Hash
+	key      libtrust.PrivateKey
+	cert     *x509.Certificate
+	rawCerts [][]byte
+	hash     crypto.Hash
 }
 
 // NewSignerFromFiles creates a signer from files
@@ -69,27 +70,31 @@ func NewSigner(key libtrust.PrivateKey, certs []*x509.Certificate) (signature.Si
 		return nil, errors.New("key and certificate mismatch")
 	}
 
-	certsBytes := make([][]byte, 0, len(certs))
+	rawCerts := make([][]byte, 0, len(certs))
 	for _, cert := range certs {
-		certsBytes = append(certsBytes, cert.Raw)
+		rawCerts = append(rawCerts, cert.Raw)
 	}
 
 	return &signer{
-		key:   key,
-		certs: certsBytes,
-		hash:  crypto.SHA256,
+		key:      key,
+		cert:     cert,
+		rawCerts: rawCerts,
+		hash:     crypto.SHA256,
 	}, nil
 }
 
-func (s *signer) Sign(c []byte) (signature.Signature, error) {
-	sig, alg, err := s.key.Sign(bytes.NewReader(c), s.hash)
+func (s *signer) Sign(raw []byte) (signature.Signature, error) {
+	if err := verifyReferences(raw, s.cert); err != nil {
+		return signature.Signature{}, err
+	}
+	sig, alg, err := s.key.Sign(bytes.NewReader(raw), s.hash)
 	if err != nil {
 		return signature.Signature{}, err
 	}
 	return signature.Signature{
 		Type:      Type,
 		Algorithm: alg,
-		X5c:       s.certs,
+		X5c:       s.rawCerts,
 		Signature: sig,
 	}, nil
 }
