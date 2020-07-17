@@ -71,6 +71,10 @@ func runSign(ctx *cli.Context) error {
 	if err != nil {
 		return err
 	}
+	sigma, err := signature.Pack(content, sig)
+	if err != nil {
+		return err
+	}
 
 	path := ctx.String("output")
 	if path == "" {
@@ -81,7 +85,7 @@ func runSign(ctx *cli.Context) error {
 		return err
 	}
 	defer file.Close()
-	return json.NewEncoder(file).Encode(sig)
+	return json.NewEncoder(file).Encode(sigma)
 }
 
 func prepareContentForSigning(ctx *cli.Context) (signature.Content, error) {
