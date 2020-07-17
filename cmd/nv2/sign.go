@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"os"
 	"strings"
 	"time"
 
@@ -91,19 +90,10 @@ func runSign(ctx *cli.Context) error {
 }
 
 func prepareContentForSigning(ctx *cli.Context) (signature.Content, error) {
-	var (
-		manifest signature.Manifest
-		err      error
-	)
-	if uri := ctx.Args().First(); uri != "" {
-		manifest, err = getManfestsFromURI(uri)
-	} else {
-		manifest, err = getManifestFromReader(os.Stdin)
-	}
+	manifest, err := getManifestFromContext(ctx)
 	if err != nil {
 		return signature.Content{}, err
 	}
-
 	manifest.References = ctx.StringSlice("reference")
 	now := time.Now()
 	nowUnix := now.Unix()

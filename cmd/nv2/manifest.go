@@ -9,7 +9,15 @@ import (
 
 	"github.com/notaryproject/nv2/pkg/signature"
 	"github.com/opencontainers/go-digest"
+	"github.com/urfave/cli/v2"
 )
+
+func getManifestFromContext(ctx *cli.Context) (signature.Manifest, error) {
+	if uri := ctx.Args().First(); uri != "" {
+		return getManfestsFromURI(uri)
+	}
+	return getManifestFromReader(os.Stdin)
+}
 
 func getManifestFromReader(r io.Reader) (signature.Manifest, error) {
 	lr := &io.LimitedReader{

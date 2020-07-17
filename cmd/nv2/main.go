@@ -23,6 +23,7 @@ func main() {
 		},
 		Commands: []*cli.Command{
 			signCommand,
+			verifyCommand,
 		},
 	}
 	if err := app.Run(os.Args); err != nil {
