@@ -38,6 +38,7 @@ func findEntity(list openpgp.EntityList, name string) (*openpgp.Entity, string, 
 					return nil, "", errors.New("ambiguous identity: " + name)
 				}
 				candidate = entity
+				candidateIdentity = identity
 			}
 		}
 	}
