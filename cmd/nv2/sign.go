@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"strings"
 	"time"
@@ -57,16 +58,17 @@ var signCommand = &cli.Command{
 }
 
 func runSign(ctx *cli.Context) error {
+	// initialize
 	scheme, err := getSchemeForSigning(ctx)
 	if err != nil {
 		return err
 	}
 
+	// core process
 	content, err := prepareContentForSigning(ctx)
 	if err != nil {
 		return err
 	}
-
 	sig, err := scheme.Sign(signerID, content)
 	if err != nil {
 		return err
@@ -76,16 +78,16 @@ func runSign(ctx *cli.Context) error {
 		return err
 	}
 
+	// write out
+	sigmaJSON, err := json.Marshal(sigma)
+	if err != nil {
+		return err
+	}
 	path := ctx.String("output")
 	if path == "" {
 		path = strings.Split(content.Manifests[0].Digest, ":")[1] + ".nv2"
 	}
-	file, err := os.Create(path)
-	if err != nil {
-		return err
-	}
-	defer file.Close()
-	return json.NewEncoder(file).Encode(sigma)
+	return ioutil.WriteFile(path, sigmaJSON, 0666)
 }
 
 func prepareContentForSigning(ctx *cli.Context) (signature.Content, error) {
