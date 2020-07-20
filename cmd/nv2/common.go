@@ -6,11 +6,15 @@ var (
 	usernameFlag = &cli.StringFlag{
 		Name:    "username",
 		Aliases: []string{"u"},
-		Usage:   "generic username for remote access",
+		Usage:   "username for generic remote access",
 	}
 	passwordFlag = &cli.StringFlag{
 		Name:    "password",
 		Aliases: []string{"p"},
-		Usage:   "generic password for remote access",
+		Usage:   "password for generic remote access",
+	}
+	insecureFlag = &cli.BoolFlag{
+		Name:  "insecure",
+		Usage: "enable insecure remote access",
 	}
 )

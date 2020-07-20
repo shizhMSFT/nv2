@@ -48,6 +48,7 @@ var verifyCommand = &cli.Command{
 		},
 		usernameFlag,
 		passwordFlag,
+		insecureFlag,
 	},
 	Action: runVerify,
 }

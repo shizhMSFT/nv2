@@ -55,7 +55,11 @@ func getManfestsFromURI(ctx *cli.Context, uri string) (signature.Manifest, error
 		defer file.Close()
 		r = file
 	case "docker", "oci":
-		remote := registry.NewClient(nil, ctx.String("username"), ctx.String("password"))
+		remote := registry.NewClient(nil, &registry.ClientOptions{
+			Username: ctx.String("username"),
+			Password: ctx.String("password"),
+			Insecure: ctx.Bool("insecure"),
+		})
 		return remote.GetManifestMetadata(parsed)
 	default:
 		return signature.Manifest{}, fmt.Errorf("unsupported URI scheme: %s", parsed.Scheme)

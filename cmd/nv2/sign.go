@@ -67,6 +67,7 @@ var signCommand = &cli.Command{
 		},
 		usernameFlag,
 		passwordFlag,
+		insecureFlag,
 	},
 	Action: runSign,
 }

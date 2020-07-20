@@ -60,7 +60,12 @@ func (c *Client) getManifestMetadata(uri *url.URL, mediaTypes ...string) (signat
 		repository = path
 		reference = "latest"
 	}
-	url := fmt.Sprintf("https://%s/v2/%s/manifests/%s",
+	scheme := "https"
+	if c.insecure {
+		scheme = "http"
+	}
+	url := fmt.Sprintf("%s://%s/v2/%s/manifests/%s",
+		scheme,
 		host,
 		repository,
 		reference,
