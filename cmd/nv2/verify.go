@@ -46,6 +46,8 @@ var verifyCommand = &cli.Command{
 			Name:  "disable-gpg",
 			Usage: "disable GPG for verification [gpg]",
 		},
+		usernameFlag,
+		passwordFlag,
 	},
 	Action: runVerify,
 }
