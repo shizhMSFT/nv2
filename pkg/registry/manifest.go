@@ -84,6 +84,14 @@ func (c *Client) getManifestMetadata(uri *url.URL, mediaTypes ...string) (signat
 		return signature.Manifest{}, fmt.Errorf("%v: %v", url, err)
 	}
 	resp.Body.Close()
+	switch resp.StatusCode {
+	case http.StatusOK:
+		// no op
+	case http.StatusUnauthorized, http.StatusNotFound:
+		return signature.Manifest{}, fmt.Errorf("%v: %s", uri, resp.Status)
+	default:
+		return signature.Manifest{}, fmt.Errorf("%v: %s", url, resp.Status)
+	}
 
 	header := resp.Header
 	digest := header.Get("Docker-Content-Digest")
