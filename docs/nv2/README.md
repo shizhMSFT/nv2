@@ -46,7 +46,7 @@ By default, all keys sit in the directory `~/.gnupg`. If the `gpg` version is `>
 gpg --export-secret-keys > ~/.gnupg/secring.gpg
 ```
 
-until the issue golang/go#29082 is resolved.
+until the issue [golang/go#29082](https://github.com/golang/go/issues/29082) is resolved.
 
 #### Self-signed Certificate Generation
 
@@ -56,7 +56,7 @@ To generate a `x509` self-signed certificate key pair `key.pem` and `cert.pem`, 
 openssl req -x509 -sha256 -nodes -newkey rsa:2048 -keyout key.pem -out cert.pem -days 365
 ```
 
-When generating the certificate, make sure that the Common Name (CN) is set properly in the Subject field. The Common Name will be verified against the claimed original references.
+When generating the certificate, make sure that the Common Name (`CN`) is set properly in the `Subject` field. The Common Name will be verified against the claimed original references.
 
 ## Offline Signing and Verification
 
@@ -120,7 +120,7 @@ nv2 sign -m gpg -i "Demo User" file:///home/demo/example.json
 
 ### Signing using `x509`
 
-To sign the manifest `example.json` using the key `key.pem` from the `x509` certificate with the Common Name `example.registry.io`, run
+To sign the manifest `example.json` using the key `key.pem` from the `x509` certificate `cert.pem` with the Common Name `example.registry.io`, run
 
 ```shell
 nv2 sign -m x509 -k key.pem -c cert.pem -r example.registry.io/example:latest -o example.nv2 file:example.json
@@ -205,7 +205,7 @@ $ nv2 verify -f example.nv2 -c cert.pem file:example.json
 sha256:3351c53952446db17d21b86cfe5829ae70f823aff5d410fbf09dff820a39ab55
 ```
 
-On successful verification, the `sha256` digest of the manifest is printed.
+On successful verification, the `sha256` digest of the manifest is printed. Otherwise, `nv2` prints error messages and returns non-zero values.
 
 The command `nv2 verify` takes care of all signing methods. Since the original references of a manifest signed using `gpg` does not imply that it is signed by the domain owner, we should disable the `gpg` verification by setting the `--disable-gpg` option.
 
@@ -216,7 +216,7 @@ $ nv2 verify -f gpg.nv2 --disable-gpg file:example.json
 
 ## Remote Manifests
 
-With `nv2`, it is also possible to sign and verify a manifest or a manifest list  in a remote registry where the registry can be a docker registry or an OCI registry.
+With `nv2`, it is also possible to sign and verify a manifest or a manifest list in a remote registry where the registry can be a docker registry or an OCI registry.
 
 ### Docker Registry
 
