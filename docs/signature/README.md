@@ -53,7 +53,7 @@ A Notary v2 signature is clear-signed signature of manifest metadata, including 
 
     This REQUIRED property identifies the signature type. Implementations MUST support at least the following types
 
-    - `x509`: X.509 public key certificates.
+    - `x509`: X.509 public key certificates. Implementations MUST verify that the certificate of the signing key has the `digitalSignature` `Key Usage` extension ([RFC 5280 Section 4.2.1.3](https://tools.ietf.org/html/rfc5280#section-4.2.1.3)).
 
     Implementations SHOULD support the following types
 
