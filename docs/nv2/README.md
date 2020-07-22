@@ -75,7 +75,7 @@ The two major commands of `nv2` are
      --method value, -m value     siging method
      --key value, -k value        siging key file [x509]
      --cert value, -c value       siging cert [x509]
-     --key-ring value             gpg public key ring file [gpg] (default: "/home/shizh/.gnupg/secring.gpg")
+     --key-ring value             gpg public key ring file [gpg] (default: "/home/demo/.gnupg/secring.gpg")
      --identity value, -i value   signer identity [gpg]
      --expiry value, -e value     expire duration (default: 0s)
      --reference value, -r value  original references
@@ -99,7 +99,7 @@ The two major commands of `nv2` are
      --signature value, -s value, -f value  signature file
      --cert value, -c value                 certs for verification [x509]
      --ca-cert value                        CA certs for verification [x509]
-     --key-ring value                       gpg public key ring file [gpg] (default: "/home/shizh/.gnupg/pubring.gpg")
+     --key-ring value                       gpg public key ring file [gpg] (default: "/home/demo/.gnupg/pubring.gpg")
      --disable-gpg                          disable GPG for verification [gpg] (default: false)
      --username value, -u value             username for generic remote access
      --password value, -p value             password for generic remote access
