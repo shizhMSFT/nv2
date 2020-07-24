@@ -22,19 +22,19 @@ var signCommand = &cli.Command{
 		&cli.StringFlag{
 			Name:     "method",
 			Aliases:  []string{"m"},
-			Usage:    "siging method",
+			Usage:    "signing method",
 			Required: true,
 		},
 		&cli.StringFlag{
 			Name:      "key",
 			Aliases:   []string{"k"},
-			Usage:     "siging key file [x509]",
+			Usage:     "signing key file [x509]",
 			TakesFile: true,
 		},
 		&cli.StringFlag{
 			Name:      "cert",
 			Aliases:   []string{"c"},
-			Usage:     "siging cert [x509]",
+			Usage:     "signing cert [x509]",
 			TakesFile: true,
 		},
 		&cli.DurationFlag{
