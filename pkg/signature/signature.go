@@ -12,10 +12,10 @@ type Signed struct {
 
 // Content contains the contents to be signed
 type Content struct {
-	Expiration int64      `json:"exp,omitempty"`
-	NotBefore  int64      `json:"nbf,omitempty"`
-	IssuedAt   int64      `json:"iat,omitempty"`
-	Manifests  []Manifest `json:"manifests"`
+	Manifest
+	Expiration int64 `json:"exp,omitempty"`
+	NotBefore  int64 `json:"nbf,omitempty"`
+	IssuedAt   int64 `json:"iat,omitempty"`
 }
 
 // Manifest to be signed

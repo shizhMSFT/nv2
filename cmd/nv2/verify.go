@@ -62,22 +62,13 @@ func runVerify(ctx *cli.Context) error {
 	if err != nil {
 		return err
 	}
-	if !containsManifest(content.Manifests, manifest) {
+	if content.Manifest.Digest != manifest.Digest || content.Manifest.Size != manifest.Size {
 		return fmt.Errorf("verification failure: manifest is not signed: %s", manifest.Digest)
 	}
 
 	// write out
 	fmt.Println(manifest.Digest)
 	return nil
-}
-
-func containsManifest(set []signature.Manifest, target signature.Manifest) bool {
-	for _, manifest := range set {
-		if manifest.Digest == target.Digest && manifest.Size == target.Size {
-			return true
-		}
-	}
-	return false
 }
 
 func readSignatrueFile(path string) (sig signature.Signed, err error) {

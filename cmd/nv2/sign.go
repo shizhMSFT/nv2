@@ -87,13 +87,13 @@ func runSign(ctx *cli.Context) error {
 	}
 	path := ctx.String("output")
 	if path == "" {
-		path = strings.Split(content.Manifests[0].Digest, ":")[1] + ".nv2"
+		path = strings.Split(content.Manifest.Digest, ":")[1] + ".nv2"
 	}
 	if err := ioutil.WriteFile(path, sigmaJSON, 0666); err != nil {
 		return err
 	}
 
-	fmt.Println(content.Manifests[0].Digest)
+	fmt.Println(content.Manifest.Digest)
 	return nil
 }
 
@@ -106,10 +106,8 @@ func prepareContentForSigning(ctx *cli.Context) (signature.Content, error) {
 	now := time.Now()
 	nowUnix := now.Unix()
 	content := signature.Content{
+		Manifest: manifest,
 		IssuedAt: nowUnix,
-		Manifests: []signature.Manifest{
-			manifest,
-		},
 	}
 	if expiry := ctx.Duration("expiry"); expiry != 0 {
 		content.NotBefore = nowUnix
