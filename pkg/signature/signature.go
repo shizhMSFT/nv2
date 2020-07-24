@@ -32,5 +32,4 @@ type Signature struct {
 	Algorithm string   `json:"alg,omitempty"`
 	KeyID     string   `json:"kid,omitempty"`
 	X5c       [][]byte `json:"x5c,omitempty"`
-	Issuer    string   `json:"iss,omitempty"`
 }
