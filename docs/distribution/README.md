@@ -2,7 +2,7 @@
 
 We introduce new REST APIs in the registry to support storing signature objects together with the target artifacts, and retrieving them for verification. 
 
-- [Registry OpenAPI Spec](../../specs/distribution/signatures.yml)
+- [Registry OpenAPI Spec](./spec.yml)
 
 Here, we illustrate a few sample requests for the new APIs.
 
@@ -17,8 +17,6 @@ The list signatures for an artifact can be retrieved from the registry.
 - Get signatures with optional parameters: 
   - Paginated request:
     - `GET http://localhost:5000/v2/hello-world/manifests/sha256:90659bf80b44ce6be8234e6ff90a1ac34acbeb826903b02cfa0da11c82cbc042/signatures/?last={last}&max={max}`
-  - Query by signer:
-    - `GET http://localhost:5000/v2/hello-world/manifests/sha256:90659bf80b44ce6be8234e6ff90a1ac34acbeb826903b02cfa0da11c82cbc042/signatures/?iss={iss}`
 
 ### URI Parameters
 
@@ -26,7 +24,6 @@ The list signatures for an artifact can be retrieved from the registry.
 | --------- | ------------------------------------------------------------ |
 | `last`    | Query parameter for the last item in previous query. Result set will include values lexically after last. |
 | `max`     | Query parameter for max number of items.                     |
-| `iss`     | Query parameter for issuer, example: `Open Image Scanner`    |
 
 ### Sample Response
 
