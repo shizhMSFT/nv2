@@ -8,7 +8,6 @@ import (
 
 	"github.com/notaryproject/nv2/internal/crypto"
 	"github.com/notaryproject/nv2/pkg/signature"
-	"github.com/notaryproject/nv2/pkg/signature/gpg"
 	x509nv2 "github.com/notaryproject/nv2/pkg/signature/x509"
 	"github.com/urfave/cli/v2"
 )
@@ -35,16 +34,6 @@ var verifyCommand = &cli.Command{
 			Name:      "ca-cert",
 			Usage:     "CA certs for verification [x509]",
 			TakesFile: true,
-		},
-		&cli.StringFlag{
-			Name:      "key-ring",
-			Usage:     "gpg public key ring file [gpg]",
-			Value:     gpg.DefaultPublicKeyRingPath(),
-			TakesFile: true,
-		},
-		&cli.BoolFlag{
-			Name:  "disable-gpg",
-			Usage: "disable GPG for verification [gpg]",
 		},
 		usernameFlag,
 		passwordFlag,
@@ -110,15 +99,6 @@ func getSchemeForVerification(ctx *cli.Context) (*signature.Scheme, error) {
 		return nil, err
 	}
 	scheme.RegisterVerifier(verifier)
-
-	// add gpg verifier
-	if !ctx.Bool("disable-gpg") {
-		verifier, err := gpg.NewVerifier(ctx.String("key-ring"))
-		if err != nil {
-			return nil, err
-		}
-		scheme.RegisterVerifier(verifier)
-	}
 
 	return scheme, nil
 }
