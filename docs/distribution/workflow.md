@@ -47,7 +47,8 @@ This creates a signature `hello-world.nv2`.
 Validate image `hello-world:dev`.
 
 ```
-$ docker generate manifest hello-world:dev | nv2 verify -f hello-world.nv2 -c cert.pem
+$ docker generate manifest hello-world:dev | nv2 verify -f hello-world.nv2 -c cert.crt
+
 sha256:3351c53952446db17d21b86cfe5829ae70f823aff5d410fbf09dff820a39ab55
 ```
 
@@ -58,7 +59,7 @@ sha256:3351c53952446db17d21b86cfe5829ae70f823aff5d410fbf09dff820a39ab55
 Sign image `hello-world:dev`.
 
 ```shell
-docker generate manifest hello-world:dev | nv2 sign -m x509 -k key.pem -o hello-world.nv2
+docker generate manifest hello-world:dev | nv2 sign -m x509 -k key.key -o hello-world.nv2
 ```
 
 This creates a signature `hello-world.nv2`.
@@ -91,6 +92,6 @@ A consumer of the target artifact, such as an orchestrator deploying an image, c
 Fetch the signatures on this artifact form the registry and verify each one of them (or a configured few). After fetching the signature artifact `hello-world.nv2`, the system will do the following equivalent 
 
 ```
-$ nv2 verify -f hello-world.nv2 -c cert.pem --insecure docker://localhost:5000/hello-world:v1.0
+$ nv2 verify -f hello-world.nv2 -c cert.crt --insecure docker://localhost:5000/hello-world:v1.0
 sha256:3351c53952446db17d21b86cfe5829ae70f823aff5d410fbf09dff820a39ab55
 ```

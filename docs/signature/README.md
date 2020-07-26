@@ -2,7 +2,18 @@
 
 This section defines the signature file, which is in JSON format with no whitespaces. Its JSON schema is available at [schema.json](schema.json).
 
-# Signature
+## Signature Goals
+
+- Offline signature creation
+- Persistance within an [OCI Artifact][oci-artifacts] enabled, [distribution-spec][distribution-spec] based registry
+- Artifact and signature copying within and across [OCI Artifact][oci-artifacts] enabled, [distribution-spec][distribution-spec] based registries
+- Support public registry acquisition of content - where the public registry may host certified content as well as public, non-certified content
+- Support private registries, where public content may be copied to, and new content originated within
+- Air-gapped environments, where the originating registry of content is not accessable
+- Multiple signatures per artifact, enabling the originating vendor signature, public registry certification and user/environment signatures
+- Maintain the original artifact digest and collection of associated tags, supporting dev/ops deployment definitions
+
+## Signature
 
 A Notary v2 signature is clear-signed signature of manifest metadata, including but not limited to
 
@@ -10,6 +21,87 @@ A Notary v2 signature is clear-signed signature of manifest metadata, including 
 - [OCI Image Manifest](https://github.com/opencontainers/image-spec/blob/master/manifest.md)
 - [Docker Image Manifest List](https://docs.docker.com/registry/spec/manifest-v2-2/#manifest-list)
 - [Docker Image Manifest](https://docs.docker.com/registry/spec/manifest-v2-2/#image-manifest)
+
+### Signing an Artifact Manifest
+
+For any [OCI Artifact][oci-artifacts] submitted to a registry, an [OCI Manifest][oci-manifest] and an optional [OCI Manifest List/Index][oci-manifest-list] is required.
+
+The nv2 prototype signs a combination of:
+
+- Key properties
+- The target artifact manifest digest
+- *optional:* list of associated tags
+
+#### Generating a self-signed x509 cert
+
+``` shell
+openssl req \
+  -x509 \
+  -sha256 \
+  -nodes \
+  -newkey rsa:2048 \
+  -days 365 \
+  -subj "/CN=registry.example.com/O=example inc/C=US/ST=Washington/L=Seattle" \
+  -keyout example.key \
+  -out example.crt
+```
+
+An nv2 client would generate the following content to be signed:
+
+``` JSON
+{
+  "signed": {
+      "exp": 1626938793,
+      "nbf": 1595402793,
+      "iat": 1595402793,
+      "digest": "sha256:3351c53952446db17d21b86cfe5829ae70f823aff5d410fbf09dff820a39ab55",
+      "size": 528,
+      "references": [
+          "registry.example.com/hello-world:latest",
+          "registry.example.com/hello-world:v1.0"
+      ]
+  }
+```
+
+The signature of the above would be represented as:
+
+``` JSON
+{
+  "signature": {
+    "typ": "x509",
+    "sig": "uFKaCyQ4MtVHemfLVq5gYZyeiClS20tksXzP7hhpeqqjCNK9DiHnoDpkq91sutLqd1o6RCxpfFVuGXy20oqRu1/ZoXXAVC3y7lS6z/wqJ4VDBKSj/H6xyYn7pH3GE8GHR6kjFPqrGsl/OS4yYH2oNXEm9W8Pju2wC381+FCgf4LNf7k6u2Uf4Fb0/Fl40qzvr0m2Fv5pXtRY+wdJctqJb+t408VcXJkNj0U7xoOe0zUr3l1A6xLYqjd0ZY08JBQ8FQul0Vpxrmg0Xdtwd/wEolvia48lxD1x7yphW5bFvJOTd62rOJgd4uI7jYJF3ZLmwjY+geMk5e6Wkp5OyXGjXw==",
+    "alg": "RS256",
+    "x5c": [
+      "MIIDmzCCAoOgAwIBAgIUFSzsIT4/pKtGzywuZWWE7ydiLBIwDQYJKoZIhvcNAQELBQAwXTELMAkGA1UEBhMCQVUxEzARBgNVBAgMClNvbWUtU3RhdGUxITAfBgNVBAoMGEludGVybmV0IFdpZGdpdHMgUHR5IEx0ZDEWMBQGA1UEAwwNKi5leGFtcGxlLmNvbTAeFw0yMDA3MjIwMzA2MTBaFw0yMTA3MjIwMzA2MTBaMF0xCzAJBgNVBAYTAkFVMRMwEQYDVQQIDApTb21lLVN0YXRlMSEwHwYDVQQKDBhJbnRlcm5ldCBXaWRnaXRzIFB0eSBMdGQxFjAUBgNVBAMMDSouZXhhbXBsZS5jb20wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDM0MNLy/f1SyRM0ZQu3AtJnCU3O5x8nnOeV1mySmZNr2SCqR8+jENAoKE5FrrSi2ffMnFPP/7DqGnbb9+b1nD9ucFNsI1iW7IrF/GlqOM7jJhUMNnOyatz8mddtQgXr3SZ9bigbc/lxuVGacvi64DewoWzMFr4ZMGq8ik7aDnHryUDwXJFE+KGNbsReO1ePqKmPiLvkLG4sBTqeTuCk+Grrr5t1COujwuFWfhMjmRfq34QGqUZ3SHJYXPzOAxgV3fCmBP9IgHuSv/b1udx5Htf1BV7WlARtXfE21xuA6FM1Gq0pANUhcRF39KJRu4/RBZBmAxg7ces8hrZWTQ4LTo/AgMBAAGjUzBRMB0GA1UdDgQWBBR2pI+c2dexlOZCXLy84Baqu8NR8DAfBgNVHSMEGDAWgBR2pI+c2dexlOZCXLy84Baqu8NR8DAPBgNVHRMBAf8EBTADAQH/MA0GCSqGSIb3DQEBCwUAA4IBAQCH2tChjmvs6/2acw+cJYWkEExdXMEyjdUvqEIcs7W7Ce32My7RcMtJxybtqjV+UVghEVUzq1pNf0Dt5FhFkC6BDHnHv2SIO9jq2TvfDUcJgMMgwSZdSaISmxk+iFD9Cll+RU8KgeoYSnwojOixTksyeBRi5rePdO5smz/n4Bd4ToluKaw42tdWhF4SMgx2Y1nlyHpFlkdUYtJ6D8rOvbVRGQaxo8Td3mWCWPMBYcGvjwO9ESCP1JAK+Z6WXD46JWilsIUd3Y+0NrfvOYKUdhLWuz9LrQ5060qi1pHfYBOTAbyXfnW97EB3TAuMtqBBe6h3VNw00c1p7qrilE1Of9uN"
+    ]
+  }
+}
+```
+
+### Signature Persisted within an OCI Artifact Enabled Registry
+
+Both values are persisted in a `signature.json` file. The file would be submitted to a registry as an Artifact with null layers.
+The `signature.json` would be persisted wthin the `manifest.config` object
+
+``` SHELL
+oras push \
+  registry.example.com/hello-world:v1.0 \
+  --manifest-config signature.json:application/vnd.cncf.notary.config.v2+json
+```
+
+Would push the following manifest:
+
+``` JSON
+{
+  "schemaVersion": 2,
+  "config": {
+    "mediaType": "application/vnd.cncf.notary.config.v2+json",
+    "size": 1906,
+    "digest": "sha256:c7848182f2c817415f0de63206f9e4220012cbb0bdb750c2ecf8020350239814"
+  },
+  "layers": []
+}
+```
 
 ## *Signature* Property Descriptions
 
@@ -41,9 +133,9 @@ A Notary v2 signature is clear-signed signature of manifest metadata, including 
 
     This OPTIONAL property claims the manifest references of its origin. The format of the value MUST matches the [*reference* grammar](https://github.com/docker/distribution/blob/master/reference/reference.go). With used, the `x509` signatures are valid only if the domain names of all references match the Common Name (`CN`) in the `Subject` field of the certificate.
 
-- **`signatures`** *array of objects*
+- **`signature`** *string*
 
-  This REQUIRED property provides the signatures of the signed content. The entire signature file is valid if any signature in `signatures` is valid. The `signature` object is influenced by JSON Web Signature (JWS) at [RFC 7515](https://tools.ietf.org/html/rfc7515).
+  This REQUIRED property provides the signature of the signed content. The entire signature file is valid if any signature is valid. The `signature` object is influenced by JSON Web Signature (JWS) at [RFC 7515](https://tools.ietf.org/html/rfc7515).
 
   - **`typ`** *string*
 
@@ -73,31 +165,31 @@ A Notary v2 signature is clear-signed signature of manifest metadata, including 
 
 ## Example Signatures
 
+### x509 Signature
+
 Example showing a formatted `x509` signature file [examples/x509_x5c.nv2.json](examples/x509_x5c.nv2.json) with certificates provided by `x5c`:
 
 ```json
 {
-    "signed": {
-        "digest": "sha256:3351c53952446db17d21b86cfe5829ae70f823aff5d410fbf09dff820a39ab55",
-        "size": 528,
-        "references": [
-            "registry.example.com/example:latest",
-            "registry.example.com/example:v1.0"
-        ],
-        "exp": 1626772975,
-        "nbf": 1595560975,
-        "iat": 1595560975
-    },
-    "signatures": [
-        {
-            "typ": "x509",
-            "sig": "bmVxnJIBDAP9TVDWdpQwfI5OkdDo75wB+yigjJbFa74fhNmzm7GIu9jCnkmcwBLMO+XuUkTbP+5eFYC+N3B+nhrsD4ci4dsVGJY8XBP0YCTc513hO+LjxP5ITP4gd0DZsSU7eSgnqo+Yd7DO0ZpL3YRAOWB+ZS1EHYwcm0VGL0YmItrbIf6irPMpVyfrkjKTywtQfLSZ2K3KPM4OKM9aTaDXy+MeSpnN22xDyeor/eUSi59OOUILfWGTIYsC0jpryE/dNN6dHej1K+AmG/wCnlmexUNvY7WN1YsqQKiti9NM6nfsGcNsjP4D9DF+spoGtoE3ZLjrUqcePQ0v2mZGtQ==",
-            "alg": "RS256",
-            "x5c": [
-                "MIIDmzCCAoOgAwIBAgIUCaGfGGjg9hCjxS2KncvpdlQZ6kUwDQYJKoZIhvcNAQELBQAwXTELMAkGA1UEBhMCQVUxEzARBgNVBAgMClNvbWUtU3RhdGUxITAfBgNVBAoMGEludGVybmV0IFdpZGdpdHMgUHR5IEx0ZDEWMBQGA1UEAwwNKi5leGFtcGxlLmNvbTAeFw0yMDA3MjQwMzE2NDBaFw0yMTA3MjQwMzE2NDBaMF0xCzAJBgNVBAYTAkFVMRMwEQYDVQQIDApTb21lLVN0YXRlMSEwHwYDVQQKDBhJbnRlcm5ldCBXaWRnaXRzIFB0eSBMdGQxFjAUBgNVBAMMDSouZXhhbXBsZS5jb20wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDVgGfJ3gb41R+WfDFfSck6HkoJHTMpbGcowmP8gCmVU3E3NMF6y3LrqaYM8UZAJSSe28dmkhdWvlBeR6UhUpa/f2HxsOY3w/lgBiVfB2rrRegC6WEcqkWNh4JewOLOwEjvdjPiaaCZpgIvHbyEiT3hJPRTGOfNvoeidXSOLiEpAF10HRO0OXO+A06LyiY2qfB5HrCOrmu/GNSch1oICrW6gJwQY5JxSULIRTcZV7496rLtKfw/DnkWoqc2JJUIslS2IvqdmrylOtWXUeErDKrGF/TtC476av5ssecCf4nGTbSSiu+eW85xug3Urgh54Ei0ztIfxdta2frWGg+lQ6CZAgMBAAGjUzBRMB0GA1UdDgQWBBR/2xw5wUZHuuiZJAWOHRB5s+hynjAfBgNVHSMEGDAWgBR/2xw5wUZHuuiZJAWOHRB5s+hynjAPBgNVHRMBAf8EBTADAQH/MA0GCSqGSIb3DQEBCwUAA4IBAQAu3hJCaGvPddR3dPJCXW09BPd2gz1d1QB32jEhUrfB4YO+N7ib3ck4i743rC7AvuznwVlkw6FIaJTvcdwwDanWZhOtXOy1wcVXYFFn3HeI+pYSpqSuYMo/wsdaFEPI0D20R+BeM8FOAQuC30Ve9lr6E0xO0vDZZ/ZqVgL6J2yHDQVJGaXbLIRkv19gOh5IkktmpUCnTFpgj+EhHZJIhVpSR1IUh7FPVslwnUsjgOxWdKJn3Vcbep+Gw4zdP1XMTOStagEjaic0cg6Ls4Av/9YNGcwTfzzzoAvCWekTuf+LcvAa2JJvJnXl6azwLUFHTM664yThG+3MgiMkDhd7sVn1"
-            ]
-        }
+  "signed": {
+    "exp": 1626938793,
+    "nbf": 1595402793,
+    "iat": 1595402793,
+    "digest": "sha256:3351c53952446db17d21b86cfe5829ae70f823aff5d410fbf09dff820a39ab55",
+    "size": 528,
+    "references": [
+      "registry.example.com/example:latest",
+      "registry.example.com/example:v1.0"
     ]
+  },
+  "signature": {
+    "typ": "x509",
+    "sig": "uFKaCyQ4MtVHemfLVq5gYZyeiClS20tksXzP7hhpeqqjCNK9DiHnoDpkq91sutLqd1o6RCxpfFVuGXy20oqRu1/ZoXXAVC3y7lS6z/wqJ4VDBKSj/H6xyYn7pH3GE8GHR6kjFPqrGsl/OS4yYH2oNXEm9W8Pju2wC381+FCgf4LNf7k6u2Uf4Fb0/Fl40qzvr0m2Fv5pXtRY+wdJctqJb+t408VcXJkNj0U7xoOe0zUr3l1A6xLYqjd0ZY08JBQ8FQul0Vpxrmg0Xdtwd/wEolvia48lxD1x7yphW5bFvJOTd62rOJgd4uI7jYJF3ZLmwjY+geMk5e6Wkp5OyXGjXw==",
+    "alg": "RS256",
+    "x5c": [
+      "MIIDmzCCAoOgAwIBAgIUFSzsIT4/pKtGzywuZWWE7ydiLBIwDQYJKoZIhvcNAQELBQAwXTELMAkGA1UEBhMCQVUxEzARBgNVBAgMClNvbWUtU3RhdGUxITAfBgNVBAoMGEludGVybmV0IFdpZGdpdHMgUHR5IEx0ZDEWMBQGA1UEAwwNKi5leGFtcGxlLmNvbTAeFw0yMDA3MjIwMzA2MTBaFw0yMTA3MjIwMzA2MTBaMF0xCzAJBgNVBAYTAkFVMRMwEQYDVQQIDApTb21lLVN0YXRlMSEwHwYDVQQKDBhJbnRlcm5ldCBXaWRnaXRzIFB0eSBMdGQxFjAUBgNVBAMMDSouZXhhbXBsZS5jb20wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDM0MNLy/f1SyRM0ZQu3AtJnCU3O5x8nnOeV1mySmZNr2SCqR8+jENAoKE5FrrSi2ffMnFPP/7DqGnbb9+b1nD9ucFNsI1iW7IrF/GlqOM7jJhUMNnOyatz8mddtQgXr3SZ9bigbc/lxuVGacvi64DewoWzMFr4ZMGq8ik7aDnHryUDwXJFE+KGNbsReO1ePqKmPiLvkLG4sBTqeTuCk+Grrr5t1COujwuFWfhMjmRfq34QGqUZ3SHJYXPzOAxgV3fCmBP9IgHuSv/b1udx5Htf1BV7WlARtXfE21xuA6FM1Gq0pANUhcRF39KJRu4/RBZBmAxg7ces8hrZWTQ4LTo/AgMBAAGjUzBRMB0GA1UdDgQWBBR2pI+c2dexlOZCXLy84Baqu8NR8DAfBgNVHSMEGDAWgBR2pI+c2dexlOZCXLy84Baqu8NR8DAPBgNVHRMBAf8EBTADAQH/MA0GCSqGSIb3DQEBCwUAA4IBAQCH2tChjmvs6/2acw+cJYWkEExdXMEyjdUvqEIcs7W7Ce32My7RcMtJxybtqjV+UVghEVUzq1pNf0Dt5FhFkC6BDHnHv2SIO9jq2TvfDUcJgMMgwSZdSaISmxk+iFD9Cll+RU8KgeoYSnwojOixTksyeBRi5rePdO5smz/n4Bd4ToluKaw42tdWhF4SMgx2Y1nlyHpFlkdUYtJ6D8rOvbVRGQaxo8Td3mWCWPMBYcGvjwO9ESCP1JAK+Z6WXD46JWilsIUd3Y+0NrfvOYKUdhLWuz9LrQ5060qi1pHfYBOTAbyXfnW97EB3TAuMtqBBe6h3VNw00c1p7qrilE1Of9uN"
+    ]
+  }
 }
 ```
 
@@ -105,24 +197,32 @@ Example showing a formatted `x509` signature file [examples/x509_kid.nv2.json](e
 
 ```json
 {
-    "signed": {
+  "signed": {
+    "exp": 1626938803,
+    "nbf": 1595402803,
+    "iat": 1595402803,
+    "manifests": [
+      {
         "digest": "sha256:3351c53952446db17d21b86cfe5829ae70f823aff5d410fbf09dff820a39ab55",
         "size": 528,
         "references": [
             "registry.example.com/example:latest",
             "registry.example.com/example:v1.0"
-        ],
-        "exp": 1626773010,
-        "nbf": 1595561010,
-        "iat": 1595561010
-    },
-    "signatures": [
-        {
-            "typ": "x509",
-            "sig": "i1pEMz7UUU0RWGefQOlhcTxL8f+oh4FvQRPGJbyUa7/oGb7xNXKLon3wlmulOrw9MnLRbr/j9jC8nnZm3wuIU4JQf5qL/bk80Atid/VylNdvJAr4aBNu0qMsoEkeQ1N6LAM4JsFMX0Q/T5vfqzJc+S3+GU1oJMGTmvT0lpRdD4sn8EMX2L/+VIuziAgQRHnFv2HNUYYbLdPIo2GQ6gCCfhNnak/PGznFQzxP7QXfkdkLJ18WSu0X9zD156EF1MlYxk9Hz+WuiaOo/P69V2UxGFeIyKHPQ7Q8eGlFkUypBW66HlDK62O1+jxXNtNW1zB9UBEqBiEb+vTEQllms/94Cg==",
-            "alg": "RS256",
-            "kid": "6WR3:WGKO:JOQM:6SNH:MD7N:EVFT:XDXH:SOA4:36CN:D6FJ:ZEQ5:3C46"
-        }
+        ]
+      }
     ]
+  },
+  "signature": {
+    "typ": "x509",
+    "sig": "JQWZ9/H1oQyuBxyYsPaKE7Xh4+U0uITmPwRpPOBNFOxe0qnIxmkyQD0g/W5eQRt1Jwa+2hn35EamqERmdT6ji2f/6haqfIwcSjjaiDu1q1sXGDQhk+ZVzOCCcqRaFNV0fPRwaVMwxeizTUy9ENe1ksZqAPI1SCyzSr6pAa5xKeoJXFUToPjjMm1VMzwj9qwphGk8sXhSqCAt9P9/PV50pxuWU1Dbe+y6M6ZlnET2YIswBze3EjloROQtKniy87Xb2ZwJp81R0XUbWRk5LqiJVT9jDN8/RMDBvMj8eymrjbcb/F3TugvZ99jkkEVjk6tH+dvXu9HbS9HtGh0KRO1XQw==",
+    "alg": "RS256",
+    "kid": "SE4Z:F3CT:DZ64:ONJX:6CRE:PTD2:Z755:DG7W:TSUI:I5GZ:RFKR:JCHY"
+  }
 }
 ```
+
+[distribution-spec]:    https://github.com/opencontainers/distribution-spec
+[oci-artifacts]:        https://github.com/opencontainers/artifacts
+[oci-manifest]:         https://github.com/opencontainers/image-spec/blob/master/manifest.md
+[oci-manifest-list]:    https://github.com/opencontainers/image-spec/blob/master/image-index.md
+
