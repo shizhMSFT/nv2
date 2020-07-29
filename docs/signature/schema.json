@@ -38,41 +38,37 @@
                 }
             }
         },
-        "signatures": {
-            "type": "array",
-            "minItems": 1,
-            "items": {
-                "type": "object",
-                "properties": {
-                    "typ": {
-                        "type": "string",
-                        "description": "Media type. Ref RFC7519.",
-                        "enum": [
-                            "x509"
-                        ]
-                    },
-                    "sig": {
-                        "type": "string",
-                        "description": "The signature blob."
-                    },
-                    "alg": {
-                        "type": "string",
-                        "description": "Signing algorithm. Ref RFC7515."
-                    },
-                    "x5c": {
-                        "type": "string",
-                        "description": "X509 public key certificate or certificate chain. Ref RFC7515."
-                    },
-                    "kid": {
-                        "type": "string",
-                        "description": "Signing key hint. Ref RFC7515."
-                    }
+        "signature": {
+            "type": "object",
+            "properties": {
+                "typ": {
+                    "type": "string",
+                    "description": "Media type. Ref RFC7519.",
+                    "enum": [
+                        "x509"
+                    ]
                 },
-                "required": [
-                    "typ",
-                    "sig"
-                ]
-            }
+                "sig": {
+                    "type": "string",
+                    "description": "The signature blob."
+                },
+                "alg": {
+                    "type": "string",
+                    "description": "Signing algorithm. Ref RFC7515."
+                },
+                "x5c": {
+                    "type": "string",
+                    "description": "X509 public key certificate or certificate chain. Ref RFC7515."
+                },
+                "kid": {
+                    "type": "string",
+                    "description": "Signing key hint. Ref RFC7515."
+                }
+            },
+            "required": [
+                "typ",
+                "sig"
+            ]
         }
     },
     "required": [
