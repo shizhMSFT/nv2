@@ -6,8 +6,8 @@ import (
 
 // Signed is the high level, partially deserialized metadata object
 type Signed struct {
-	Signed     json.RawMessage `json:"signed"`
-	Signatures []Signature     `json:"signatures"`
+	Signed    json.RawMessage `json:"signed"`
+	Signature Signature       `json:"signature"`
 }
 
 // Content contains the contents to be signed

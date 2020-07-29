@@ -2,20 +2,16 @@ package signature
 
 import (
 	"encoding/json"
-	"errors"
 )
 
-// Pack packs content with its signatures
-func Pack(content Content, signatures ...Signature) (Signed, error) {
+// Pack packs content with its signature
+func Pack(content Content, signature Signature) (Signed, error) {
 	signed, err := json.Marshal(content)
 	if err != nil {
 		return Signed{}, err
 	}
-	if len(signatures) == 0 {
-		return Signed{}, errors.New("missing signatures")
-	}
 	return Signed{
-		Signed:     signed,
-		Signatures: signatures,
+		Signed:    signed,
+		Signature: signature,
 	}, nil
 }

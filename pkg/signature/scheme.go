@@ -2,7 +2,6 @@ package signature
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"time"
 )
@@ -65,27 +64,18 @@ func (s *Scheme) Verify(signed Signed) (Content, Signature, error) {
 }
 
 func (s *Scheme) verifySignature(signed Signed) (Signature, error) {
+	sig := signed.Signature
+	verifier, found := s.verifiers[sig.Type]
+	if !found {
+		return Signature{}, ErrUnknownSignatureType
+	}
+
 	content := []byte(signed.Signed)
-	var err error
-	for _, sig := range signed.Signatures {
-		verifier, found := s.verifiers[sig.Type]
-		if !found {
-			err = ErrUnknownSignatureType
-			continue
-		}
-		if err = verifier.Verify(content, sig); err == nil {
-			return sig, nil
-		}
+	if err := verifier.Verify(content, sig); err != nil {
+		return Signature{}, err
 	}
-	switch len(signed.Signatures) {
-	case 0:
-		err = errors.New("no signature found")
-	case 1:
-		// no op
-	default:
-		err = errors.New("no valid signature found")
-	}
-	return Signature{}, err
+
+	return sig, nil
 }
 
 func (s *Scheme) verifyContent(content Content) error {
