@@ -50,38 +50,39 @@ An nv2 client would generate the following content to be signed:
 
 ``` JSON
 {
-  "signed": {
-      "exp": 1626938793,
-      "nbf": 1595402793,
-      "iat": 1595402793,
-      "digest": "sha256:3351c53952446db17d21b86cfe5829ae70f823aff5d410fbf09dff820a39ab55",
-      "size": 528,
-      "references": [
-          "registry.example.com/hello-world:latest",
-          "registry.example.com/hello-world:v1.0"
-      ]
-  }
+    "signed": {
+        "digest": "sha256:c4516b8a311e85f1f2a60573abf4c6b740ca3ade4127e29b05616848de487d34",
+        "size": 528,
+        "references": [
+            "registry.example.com/example:latest",
+            "registry.example.com/example:v1.0"
+        ],
+        "exp": 1627555319,
+        "nbf": 1596019319,
+        "iat": 1596019319
+    }
+}
 ```
 
 The signature of the above would be represented as:
 
 ``` JSON
 {
-  "signature": {
-    "typ": "x509",
-    "sig": "uFKaCyQ4MtVHemfLVq5gYZyeiClS20tksXzP7hhpeqqjCNK9DiHnoDpkq91sutLqd1o6RCxpfFVuGXy20oqRu1/ZoXXAVC3y7lS6z/wqJ4VDBKSj/H6xyYn7pH3GE8GHR6kjFPqrGsl/OS4yYH2oNXEm9W8Pju2wC381+FCgf4LNf7k6u2Uf4Fb0/Fl40qzvr0m2Fv5pXtRY+wdJctqJb+t408VcXJkNj0U7xoOe0zUr3l1A6xLYqjd0ZY08JBQ8FQul0Vpxrmg0Xdtwd/wEolvia48lxD1x7yphW5bFvJOTd62rOJgd4uI7jYJF3ZLmwjY+geMk5e6Wkp5OyXGjXw==",
-    "alg": "RS256",
-    "x5c": [
-      "MIIDmzCCAoOgAwIBAgIUFSzsIT4/pKtGzywuZWWE7ydiLBIwDQYJKoZIhvcNAQELBQAwXTELMAkGA1UEBhMCQVUxEzARBgNVBAgMClNvbWUtU3RhdGUxITAfBgNVBAoMGEludGVybmV0IFdpZGdpdHMgUHR5IEx0ZDEWMBQGA1UEAwwNKi5leGFtcGxlLmNvbTAeFw0yMDA3MjIwMzA2MTBaFw0yMTA3MjIwMzA2MTBaMF0xCzAJBgNVBAYTAkFVMRMwEQYDVQQIDApTb21lLVN0YXRlMSEwHwYDVQQKDBhJbnRlcm5ldCBXaWRnaXRzIFB0eSBMdGQxFjAUBgNVBAMMDSouZXhhbXBsZS5jb20wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDM0MNLy/f1SyRM0ZQu3AtJnCU3O5x8nnOeV1mySmZNr2SCqR8+jENAoKE5FrrSi2ffMnFPP/7DqGnbb9+b1nD9ucFNsI1iW7IrF/GlqOM7jJhUMNnOyatz8mddtQgXr3SZ9bigbc/lxuVGacvi64DewoWzMFr4ZMGq8ik7aDnHryUDwXJFE+KGNbsReO1ePqKmPiLvkLG4sBTqeTuCk+Grrr5t1COujwuFWfhMjmRfq34QGqUZ3SHJYXPzOAxgV3fCmBP9IgHuSv/b1udx5Htf1BV7WlARtXfE21xuA6FM1Gq0pANUhcRF39KJRu4/RBZBmAxg7ces8hrZWTQ4LTo/AgMBAAGjUzBRMB0GA1UdDgQWBBR2pI+c2dexlOZCXLy84Baqu8NR8DAfBgNVHSMEGDAWgBR2pI+c2dexlOZCXLy84Baqu8NR8DAPBgNVHRMBAf8EBTADAQH/MA0GCSqGSIb3DQEBCwUAA4IBAQCH2tChjmvs6/2acw+cJYWkEExdXMEyjdUvqEIcs7W7Ce32My7RcMtJxybtqjV+UVghEVUzq1pNf0Dt5FhFkC6BDHnHv2SIO9jq2TvfDUcJgMMgwSZdSaISmxk+iFD9Cll+RU8KgeoYSnwojOixTksyeBRi5rePdO5smz/n4Bd4ToluKaw42tdWhF4SMgx2Y1nlyHpFlkdUYtJ6D8rOvbVRGQaxo8Td3mWCWPMBYcGvjwO9ESCP1JAK+Z6WXD46JWilsIUd3Y+0NrfvOYKUdhLWuz9LrQ5060qi1pHfYBOTAbyXfnW97EB3TAuMtqBBe6h3VNw00c1p7qrilE1Of9uN"
-    ]
-  }
+    "signature": {
+        "typ": "x509",
+        "sig": "UFqN24K2fLj7/h2slM68PLTfF9CDhrEVGuMQ8m3kkQJ4SKusj9fNxYV78tTiedqB+E8SqVH66mZbdlTrVQFJAd7aL2c3NZFfo92pE9SaHnqEDqnnGWXGRVjtBRM13YyRDm2wD8aRyuL5jEDUkTw7jBLY0+LfKHMDuYCsOOzvedof7aiaFc3qA+qKiW53jn2uEGCFfAs0LmsNafGfAtVmdGSO4zX4fdnQFAGT8sbUmL71uXl9W1B6tGeLfx5nBoQUvtplQipHly/yMQvWw7qMXsaAsf/BbGDmivN06CRahSb7VOwNq6K7Py4zYeiW40hEFVz9L7/5xT5XI1unKPZDuw==",
+        "alg": "RS256",
+        "x5c": [
+            "MIIDszCCApugAwIBAgIUL1anEU/yJy67VJTbHkNX0bBNAnEwDQYJKoZIhvcNAQELBQAwaTEdMBsGA1UEAwwUcmVnaXN0cnkuZXhhbXBsZS5jb20xFDASBgNVBAoMC2V4YW1wbGUgaW5jMQswCQYDVQQGEwJVUzETMBEGA1UECAwKV2FzaGluZ3RvbjEQMA4GA1UEBwwHU2VhdHRsZTAeFw0yMDA3MjcxNDQzNDZaFw0yMTA3MjcxNDQzNDZaMGkxHTAbBgNVBAMMFHJlZ2lzdHJ5LmV4YW1wbGUuY29tMRQwEgYDVQQKDAtleGFtcGxlIGluYzELMAkGA1UEBhMCVVMxEzARBgNVBAgMCldhc2hpbmd0b24xEDAOBgNVBAcMB1NlYXR0bGUwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDkKwAcV44psjN8nno1eZ3zv1ZKUhJAoxwBOIGfIxIe+iHtpXLvFFVwk5Jbxu+Pkig2N4B3Ilrj/Vryi0hxp4mag02M733bXLRENSOFONRkslpO8zHUN5pYdnhTSwYTLap1+1bgcFSuUXLWieqZB6qc7kiv3bj3SPaf42+s48V49t/OpXxLtgiWL9XkuDTZctpJJA4vHHk6Ou0bcg7iGm+L1xwIfb8Ml4oWvT0SF35fgW08bbLXZ2v1XCLRsrWUgbq4U+KxtEpG3XIYcYhKx1rIrUhfEJkuHzgPglM11gG5W+Cyfg+wfOJig5q6axIKWzIf6C8m8lmy6bM+N5EsD9SvAgMBAAGjUzBRMB0GA1UdDgQWBBTf1hM6/ibGF+u/SVAK88FUMjzRoTAfBgNVHSMEGDAWgBTf1hM6/ibGF+u/SVAK88FUMjzRoTAPBgNVHRMBAf8EBTADAQH/MA0GCSqGSIb3DQEBCwUAA4IBAQBgvVau5+2wAuCsmOyyG28h1zyC4IPmMmpRZTDOp/pLdwXeHjJr8kEC3l92qJEvc+WAboJ1RoucHycUe7RWh2C6ZF/WPCBLyWGwnlyqGyRM9/j86UJ1OgiuZl7kl9zxwWoaxPBCmHa0RHowdQB7AVlpqg1c7FhKjhUCBmGT4Ve8tV0hdZtrZoQV+6xHPbUd37KV1B1Bmfo3o4ekoJKhUu99Eo03OpE3JLtM13A1HxABEuQGHTI0tycDBBdRn3b03HoIhU0VnqjvpV1KPvsrgYi/0VStLNezZPgGe0fG3Xgy8yekdB9NMUn+zZLATI4+z8j4QH5Wj5ZPaUkyoAD2oUJO"
+        ]
+    }
 }
 ```
 
 ### Signature Persisted within an OCI Artifact Enabled Registry
 
 Both values are persisted in a `signature.json` file. The file would be submitted to a registry as an Artifact with null layers.
-The `signature.json` would be persisted wthin the `manifest.config` object
+The `signature.json` would be persisted within the `manifest.config` object
 
 ``` SHELL
 oras push \
@@ -171,25 +172,25 @@ Example showing a formatted `x509` signature file [examples/x509_x5c.nv2.json](e
 
 ```json
 {
-  "signed": {
-    "exp": 1626938793,
-    "nbf": 1595402793,
-    "iat": 1595402793,
-    "digest": "sha256:3351c53952446db17d21b86cfe5829ae70f823aff5d410fbf09dff820a39ab55",
-    "size": 528,
-    "references": [
-      "registry.example.com/example:latest",
-      "registry.example.com/example:v1.0"
-    ]
-  },
-  "signature": {
-    "typ": "x509",
-    "sig": "uFKaCyQ4MtVHemfLVq5gYZyeiClS20tksXzP7hhpeqqjCNK9DiHnoDpkq91sutLqd1o6RCxpfFVuGXy20oqRu1/ZoXXAVC3y7lS6z/wqJ4VDBKSj/H6xyYn7pH3GE8GHR6kjFPqrGsl/OS4yYH2oNXEm9W8Pju2wC381+FCgf4LNf7k6u2Uf4Fb0/Fl40qzvr0m2Fv5pXtRY+wdJctqJb+t408VcXJkNj0U7xoOe0zUr3l1A6xLYqjd0ZY08JBQ8FQul0Vpxrmg0Xdtwd/wEolvia48lxD1x7yphW5bFvJOTd62rOJgd4uI7jYJF3ZLmwjY+geMk5e6Wkp5OyXGjXw==",
-    "alg": "RS256",
-    "x5c": [
-      "MIIDmzCCAoOgAwIBAgIUFSzsIT4/pKtGzywuZWWE7ydiLBIwDQYJKoZIhvcNAQELBQAwXTELMAkGA1UEBhMCQVUxEzARBgNVBAgMClNvbWUtU3RhdGUxITAfBgNVBAoMGEludGVybmV0IFdpZGdpdHMgUHR5IEx0ZDEWMBQGA1UEAwwNKi5leGFtcGxlLmNvbTAeFw0yMDA3MjIwMzA2MTBaFw0yMTA3MjIwMzA2MTBaMF0xCzAJBgNVBAYTAkFVMRMwEQYDVQQIDApTb21lLVN0YXRlMSEwHwYDVQQKDBhJbnRlcm5ldCBXaWRnaXRzIFB0eSBMdGQxFjAUBgNVBAMMDSouZXhhbXBsZS5jb20wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDM0MNLy/f1SyRM0ZQu3AtJnCU3O5x8nnOeV1mySmZNr2SCqR8+jENAoKE5FrrSi2ffMnFPP/7DqGnbb9+b1nD9ucFNsI1iW7IrF/GlqOM7jJhUMNnOyatz8mddtQgXr3SZ9bigbc/lxuVGacvi64DewoWzMFr4ZMGq8ik7aDnHryUDwXJFE+KGNbsReO1ePqKmPiLvkLG4sBTqeTuCk+Grrr5t1COujwuFWfhMjmRfq34QGqUZ3SHJYXPzOAxgV3fCmBP9IgHuSv/b1udx5Htf1BV7WlARtXfE21xuA6FM1Gq0pANUhcRF39KJRu4/RBZBmAxg7ces8hrZWTQ4LTo/AgMBAAGjUzBRMB0GA1UdDgQWBBR2pI+c2dexlOZCXLy84Baqu8NR8DAfBgNVHSMEGDAWgBR2pI+c2dexlOZCXLy84Baqu8NR8DAPBgNVHRMBAf8EBTADAQH/MA0GCSqGSIb3DQEBCwUAA4IBAQCH2tChjmvs6/2acw+cJYWkEExdXMEyjdUvqEIcs7W7Ce32My7RcMtJxybtqjV+UVghEVUzq1pNf0Dt5FhFkC6BDHnHv2SIO9jq2TvfDUcJgMMgwSZdSaISmxk+iFD9Cll+RU8KgeoYSnwojOixTksyeBRi5rePdO5smz/n4Bd4ToluKaw42tdWhF4SMgx2Y1nlyHpFlkdUYtJ6D8rOvbVRGQaxo8Td3mWCWPMBYcGvjwO9ESCP1JAK+Z6WXD46JWilsIUd3Y+0NrfvOYKUdhLWuz9LrQ5060qi1pHfYBOTAbyXfnW97EB3TAuMtqBBe6h3VNw00c1p7qrilE1Of9uN"
-    ]
-  }
+    "signed": {
+        "digest": "sha256:c4516b8a311e85f1f2a60573abf4c6b740ca3ade4127e29b05616848de487d34",
+        "size": 528,
+        "references": [
+            "registry.example.com/example:latest",
+            "registry.example.com/example:v1.0"
+        ],
+        "exp": 1627555319,
+        "nbf": 1596019319,
+        "iat": 1596019319
+    },
+    "signature": {
+        "typ": "x509",
+        "sig": "UFqN24K2fLj7/h2slM68PLTfF9CDhrEVGuMQ8m3kkQJ4SKusj9fNxYV78tTiedqB+E8SqVH66mZbdlTrVQFJAd7aL2c3NZFfo92pE9SaHnqEDqnnGWXGRVjtBRM13YyRDm2wD8aRyuL5jEDUkTw7jBLY0+LfKHMDuYCsOOzvedof7aiaFc3qA+qKiW53jn2uEGCFfAs0LmsNafGfAtVmdGSO4zX4fdnQFAGT8sbUmL71uXl9W1B6tGeLfx5nBoQUvtplQipHly/yMQvWw7qMXsaAsf/BbGDmivN06CRahSb7VOwNq6K7Py4zYeiW40hEFVz9L7/5xT5XI1unKPZDuw==",
+        "alg": "RS256",
+        "x5c": [
+            "MIIDszCCApugAwIBAgIUL1anEU/yJy67VJTbHkNX0bBNAnEwDQYJKoZIhvcNAQELBQAwaTEdMBsGA1UEAwwUcmVnaXN0cnkuZXhhbXBsZS5jb20xFDASBgNVBAoMC2V4YW1wbGUgaW5jMQswCQYDVQQGEwJVUzETMBEGA1UECAwKV2FzaGluZ3RvbjEQMA4GA1UEBwwHU2VhdHRsZTAeFw0yMDA3MjcxNDQzNDZaFw0yMTA3MjcxNDQzNDZaMGkxHTAbBgNVBAMMFHJlZ2lzdHJ5LmV4YW1wbGUuY29tMRQwEgYDVQQKDAtleGFtcGxlIGluYzELMAkGA1UEBhMCVVMxEzARBgNVBAgMCldhc2hpbmd0b24xEDAOBgNVBAcMB1NlYXR0bGUwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDkKwAcV44psjN8nno1eZ3zv1ZKUhJAoxwBOIGfIxIe+iHtpXLvFFVwk5Jbxu+Pkig2N4B3Ilrj/Vryi0hxp4mag02M733bXLRENSOFONRkslpO8zHUN5pYdnhTSwYTLap1+1bgcFSuUXLWieqZB6qc7kiv3bj3SPaf42+s48V49t/OpXxLtgiWL9XkuDTZctpJJA4vHHk6Ou0bcg7iGm+L1xwIfb8Ml4oWvT0SF35fgW08bbLXZ2v1XCLRsrWUgbq4U+KxtEpG3XIYcYhKx1rIrUhfEJkuHzgPglM11gG5W+Cyfg+wfOJig5q6axIKWzIf6C8m8lmy6bM+N5EsD9SvAgMBAAGjUzBRMB0GA1UdDgQWBBTf1hM6/ibGF+u/SVAK88FUMjzRoTAfBgNVHSMEGDAWgBTf1hM6/ibGF+u/SVAK88FUMjzRoTAPBgNVHRMBAf8EBTADAQH/MA0GCSqGSIb3DQEBCwUAA4IBAQBgvVau5+2wAuCsmOyyG28h1zyC4IPmMmpRZTDOp/pLdwXeHjJr8kEC3l92qJEvc+WAboJ1RoucHycUe7RWh2C6ZF/WPCBLyWGwnlyqGyRM9/j86UJ1OgiuZl7kl9zxwWoaxPBCmHa0RHowdQB7AVlpqg1c7FhKjhUCBmGT4Ve8tV0hdZtrZoQV+6xHPbUd37KV1B1Bmfo3o4ekoJKhUu99Eo03OpE3JLtM13A1HxABEuQGHTI0tycDBBdRn3b03HoIhU0VnqjvpV1KPvsrgYi/0VStLNezZPgGe0fG3Xgy8yekdB9NMUn+zZLATI4+z8j4QH5Wj5ZPaUkyoAD2oUJO"
+        ]
+    }
 }
 ```
 
@@ -197,27 +198,23 @@ Example showing a formatted `x509` signature file [examples/x509_kid.nv2.json](e
 
 ```json
 {
-  "signed": {
-    "exp": 1626938803,
-    "nbf": 1595402803,
-    "iat": 1595402803,
-    "manifests": [
-      {
-        "digest": "sha256:3351c53952446db17d21b86cfe5829ae70f823aff5d410fbf09dff820a39ab55",
+    "signed": {
+        "digest": "sha256:c4516b8a311e85f1f2a60573abf4c6b740ca3ade4127e29b05616848de487d34",
         "size": 528,
         "references": [
             "registry.example.com/example:latest",
             "registry.example.com/example:v1.0"
-        ]
-      }
-    ]
-  },
-  "signature": {
-    "typ": "x509",
-    "sig": "JQWZ9/H1oQyuBxyYsPaKE7Xh4+U0uITmPwRpPOBNFOxe0qnIxmkyQD0g/W5eQRt1Jwa+2hn35EamqERmdT6ji2f/6haqfIwcSjjaiDu1q1sXGDQhk+ZVzOCCcqRaFNV0fPRwaVMwxeizTUy9ENe1ksZqAPI1SCyzSr6pAa5xKeoJXFUToPjjMm1VMzwj9qwphGk8sXhSqCAt9P9/PV50pxuWU1Dbe+y6M6ZlnET2YIswBze3EjloROQtKniy87Xb2ZwJp81R0XUbWRk5LqiJVT9jDN8/RMDBvMj8eymrjbcb/F3TugvZ99jkkEVjk6tH+dvXu9HbS9HtGh0KRO1XQw==",
-    "alg": "RS256",
-    "kid": "SE4Z:F3CT:DZ64:ONJX:6CRE:PTD2:Z755:DG7W:TSUI:I5GZ:RFKR:JCHY"
-  }
+        ],
+        "exp": 1627554920,
+        "nbf": 1596018920,
+        "iat": 1596018920
+    },
+    "signature": {
+        "typ": "x509",
+        "sig": "emzP9ygJD3y2ZWMYGO/wyqOhaSxrhd4ZdmjC9Zd+Ba7gGmGzBylsY1CskyZw389Hz2Z0xA6AQLhaNBbbqyxuAxVXtataMRsqCl/cgyNbyYU1URB2aTUZY/3V4iJzH1O/QfwSkpQa3aN1OCL8uMBNCtM6Rde9+SX8Q8XNMByDbuXtyPDvnKunZxpofEn2ibLe2Cm3o+MTK4pgxacEWeld85gTb06NicARf7mcVj7bflLyUIgel4qvmdqT6896Gtd2ES1KawvyjoEyskdlVlneSTdEKGRYxfchwIUK4E7p3EtTnmj+FuD9MpCtP0M4CQiOr19j0NtQe2bHuTo4bwtjuw==",
+        "alg": "RS256",
+        "kid": "XP5O:Y7W2:PRB6:O355:56CC:P3A6:CBDV:EDMN:QZCK:W5PO:QMV3:T2LX"
+    }
 }
 ```
 
