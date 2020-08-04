@@ -1,6 +1,6 @@
 # OCI Distribution
 
-We introduce new REST APIs in the registry to support storing signature objects together with the target artifacts, and retrieving them for verification. 
+We introduce new REST APIs in the registry to support storing signature objects together with the target artifacts, and retrieving them for verification.
 
 - [Registry OpenAPI Spec](./spec.yml)
 
@@ -12,24 +12,15 @@ The list signatures for an artifact can be retrieved from the registry.
 
 ### Requests
 
-- Get all signatures:
+- Get a list of paginated signatures:
   - `GET http://localhost:5000/v2/hello-world/manifests/sha256:90659bf80b44ce6be8234e6ff90a1ac34acbeb826903b02cfa0da11c82cbc042/signatures/`
-- Get signatures with optional parameters: 
-  - Paginated request:
-    - `GET http://localhost:5000/v2/hello-world/manifests/sha256:90659bf80b44ce6be8234e6ff90a1ac34acbeb826903b02cfa0da11c82cbc042/signatures/?last={last}&max={max}`
-
-### URI Parameters
-
-| Parameter | Description                                                  |
-| --------- | ------------------------------------------------------------ |
-| `last`    | Query parameter for the last item in previous query. Result set will include values lexically after last. |
-| `max`     | Query parameter for max number of items.                     |
 
 ### Sample Response
 
 ```json
 {
     "digest": "sha256:90659bf80b44ce6be8234e6ff90a1ac34acbeb826903b02cfa0da11c82cbc042",
+    "@nextLink": "{opaqueUrl}",
     "signatures": [
         "sha256:2235d2d22ae5ef400769fa51c84717264cd1520ac8d93dc071374c1be49cc77c",
         "sha256:3335d2d22ae5ef400769fa51c84717264cd1520ac8d93dc071374c1be49cc88d"
@@ -73,7 +64,7 @@ On pushing signature manifest `sha256:2235d2d22ae5ef400769fa51c84717264cd1520ac8
                 └── revisions
                     └── sha256
                         ├── 90659bf80b44ce6be8234e6ff90a1ac34acbeb826903b02cfa0da11c82cbc042
-                        │   └── link
+                        │   └── link
                         └── 2235d2d22ae5ef400769fa51c84717264cd1520ac8d93dc071374c1be49cc77c
                             └── link
 ```
@@ -89,9 +80,9 @@ On pushing signature manifest `sha256:007170c33ebc4a74a0a554c86ac2b28ddf3454a5ad
                 └── revisions
                     └── sha256
                         ├── 90659bf80b44ce6be8234e6ff90a1ac34acbeb826903b02cfa0da11c82cbc042
-                        │   └── link
+                        │   └── link
                         ├── 2235d2d22ae5ef400769fa51c84717264cd1520ac8d93dc071374c1be49cc77c
-                        │   └── link
+                        │   └── link
                         └── 007170c33ebc4a74a0a554c86ac2b28ddf3454a5ad9cf90ea8cea9f9e75a153b
                             └── link 
 ```
@@ -107,15 +98,15 @@ On linking signature `sha256:2235d2d22ae5ef400769fa51c84717264cd1520ac8d93dc0713
                 └── revisions
                     └── sha256
                         ├── 90659bf80b44ce6be8234e6ff90a1ac34acbeb826903b02cfa0da11c82cbc042
-                        │   ├── link
-                        │   └── signatures
-                        │       └── sha256
-                        │           └── 2235d2d22ae5ef400769fa51c84717264cd1520ac8d93dc071374c1be49cc77c
-                        │               └── link
+                        │   ├── link
+                        │   └── signatures
+                        │       └── sha256
+                        │           └── 2235d2d22ae5ef400769fa51c84717264cd1520ac8d93dc071374c1be49cc77c
+                        │               └── link
                         ├── 2235d2d22ae5ef400769fa51c84717264cd1520ac8d93dc071374c1be49cc77c
-                        │   └── link
+                        │   └── link
                         └── 007170c33ebc4a74a0a554c86ac2b28ddf3454a5ad9cf90ea8cea9f9e75a153b
-                            └── link 
+                            └── link
 ```
 
 On linking signature `sha256:007170c33ebc4a74a0a554c86ac2b28ddf3454a5ad9cf90ea8cea9f9e75a153b` to target manifest `90659bf80b44ce6be8234e6ff90a1ac34acbeb826903b02cfa0da11c82cbc042`: 
@@ -129,15 +120,15 @@ On linking signature `sha256:007170c33ebc4a74a0a554c86ac2b28ddf3454a5ad9cf90ea8c
                 └── revisions
                     └── sha256
                         ├── 90659bf80b44ce6be8234e6ff90a1ac34acbeb826903b02cfa0da11c82cbc042
-                        │   ├── link
-                        │   └── signatures
-                        │       └── sha256
-                        │           ├── 2235d2d22ae5ef400769fa51c84717264cd1520ac8d93dc071374c1be49cc77c
-                        │           │   └── link
-                        │           └── 007170c33ebc4a74a0a554c86ac2b28ddf3454a5ad9cf90ea8cea9f9e75a153b
-                        │               └── link
+                        │   ├── link
+                        │   └── signatures
+                        │       └── sha256
+                        │           ├── 2235d2d22ae5ef400769fa51c84717264cd1520ac8d93dc071374c1be49cc77c
+                        │           │   └── link
+                        │           └── 007170c33ebc4a74a0a554c86ac2b28ddf3454a5ad9cf90ea8cea9f9e75a153b
+                        │               └── link
                         ├── 2235d2d22ae5ef400769fa51c84717264cd1520ac8d93dc071374c1be49cc77c
-                        │   └── link
+                        │   └── link
                         └── 007170c33ebc4a74a0a554c86ac2b28ddf3454a5ad9cf90ea8cea9f9e75a153b
                             └── link 
 ```
