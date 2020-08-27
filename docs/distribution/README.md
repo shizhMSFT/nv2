@@ -164,11 +164,12 @@ At this point, the manifests storage layout will look as follows:
                         │   └── signatures
                         │       └── sha256
                         │           └── 2235d2d22ae5ef400769fa51c84717264cd1520ac8d93dc071374c1be49cc77c
+                        │               └── link
                         └── 90659bf80b44ce6be8234e6ff90a1ac34acbeb826903b02cfa0da11c82cbc042
                             └── link
 ```
 
-Let's add another signature for the manifest `80559bf80b44ce6be8234e6ff90a1ac34acbeb826903b02cfa0da11c82cbc042`, where the digest of the index is `sha256:007170c33ebc4a74a0a554c86ac2b28ddf3454a5ad9cf90ea8cea9f9e75a153b`.
+Let's add another signature for the manifest `sha256:80559bf80b44ce6be8234e6ff90a1ac34acbeb826903b02cfa0da11c82cbc042`, where the digest of the index is `sha256:007170c33ebc4a74a0a554c86ac2b28ddf3454a5ad9cf90ea8cea9f9e75a153b`.
 
 ```json
 {

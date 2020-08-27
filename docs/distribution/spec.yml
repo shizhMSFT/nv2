@@ -1,0 +1,133 @@
+openapi: '3.0.2'
+
+info:
+  title: Signatures in OCI Distribution
+  description: Metadata API for signature related operations in an [OCI registry](https://github.com/opencontainers/distribution-spec).
+  version: '1.0'
+
+servers:
+  - url: http://localhost:5000/v2
+
+components:
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+    bearerAuth:
+      type: http
+      scheme: bearer
+
+  schemas:
+    signatures:
+      type: object
+      description: The paginated list of signatures available for a given artifact.
+      properties:
+        tag:
+          type: string
+          description: The tag reference of the artifact manifest to which the signatures apply.
+          example: v1.0
+        digest:
+          type: string
+          description: The digest of the artifact manifest to which the signatures apply.
+          example: sha256:80559bf80b44ce6be8234e6ff90a1ac34acbeb826903b02cfa0da11c82cbc042
+        nextLink:
+          type: string
+          description: An opaque identifier which can be followed to fetch the next page of results.
+        signatures:
+          type: array
+          items:
+            type: string
+            description: The digest of the signature blob.
+            example: sha256:2235d2d22ae5ef400769fa51c84717264cd1520ac8d93dc071374c1be49cc77c
+
+  parameters:
+    repoParam:
+      name: repository
+      in: path
+      description: The name of the repository.
+      required: true
+      example: hello-world
+      schema:
+        type: string
+
+    digestParam:
+      name: digest
+      in: path
+      description: The cryptographic checksum digest of the object, in the pattern '<algorithm>:<encoded>'.
+      required: true
+      example: sha256:90659bf80b44ce6be8234e6ff90a1ac34acbeb826903b02cfa0da11c82cbc042
+      schema:
+        type: string
+
+    tagParam:
+      name: tag
+      in: path
+      description: A tag reference of the object.
+      required: true
+      example: v1.0
+      schema:
+        type: string
+
+paths:
+  /{repository}/manifests/{digest}/signatures/:
+    get:
+      summary: Get a paginated list of signatures for the manifest specified by digest in the given repository.
+      operationId: getSignatures
+      security:
+        - basicAuth: []
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/repoParam"
+        - $ref: "#/components/parameters/digestParam"
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/signatures"
+
+  /{repository}/manifests/{tag}/signatures/:
+    get:
+      summary: Get a paginated list of signatures for the manifest specified by tag in the given repository.
+      operationId: getSignatures
+      security:
+        - basicAuth: []
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/repoParam"
+        - $ref: "#/components/parameters/tagParam"
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/signatures"
+          links:
+            GetNextPageOfSignatures:
+              operationId: getSignaturesNextPage
+              parameters:
+                nextLink: '$response.body#/nextLink'
+              description: The nextLink returned can be followed to fetch the next page of results.
+
+  /{nextLink}:
+    get:
+      summary: Get next page of list of signatures.
+      operationId: getSignaturesNextPage
+      security:
+        - basicAuth: []
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: nextLink
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/signatures"
