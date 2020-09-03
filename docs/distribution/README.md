@@ -3,6 +3,7 @@
 There is an ongoing discussion to modify OCI index objects to include a config property (see [proposal](https://github.com/notaryproject/nv2/pull/10)). Such a property implies a relationship between the manifests referenced in the index and its config object. For a referenced manifest, one can create a reverse lookup to the index config. With this ability, manifest signatures that are pushed to a registry as index config objects can be stored and retrieved as manifest referrer metadata.
 
 ## Table of contents
+
 1. [Manifest Referrer](#manifest-referrer)
 2. [Storing Signatures](#storing-signatures)
 3. [Retrieving Signatures](#retrieving-signatures)
@@ -10,30 +11,36 @@ There is an ongoing discussion to modify OCI index objects to include a config p
 5. [Prototype](#prototype)
 
 ## Manifest Referrer
+
 A manifest referrer is any registry artifact that has an immutatable reference to a manifest. An OCI index is a referrer to each manifest it references. Currently, the OCI image spec does not include a config property for an OCI index and there is no reverse lookup of referrers in docker distribution.\
 A modified OCI index with a config property that references a collection of manifests allows us to associate a "type" to the referrer-referenced relationship, where the type is the `mediaType` of the index config object, such as `application/vnd.cncf.notary.config.v2+jwt`.
 
 ## Storing Signatures
-The proposal is to implement a referrer metadata store for manifests that is essentially a reverse-lookup, by `mediaType`, to referrer config objects. For example, when an OCI index is pushed, if it references a config object of media type `application/vnd.cncf.notary.config.v2+jwt`, a link to the config object is recorded in the referrer metadata store of each referenced manifest.\
+
+The proposal is to implement a referrer metadata store for manifests that is essentially a reverse-lookup, by `mediaType`, to referrer config objects. For example, when an OCI index is pushed, if it references a config object of media type `application/vnd.cncf.notary.config.v2+jwt`, a link to the config object is recorded in the referrer metadata store of each referenced manifest.  
 Here are some examples showing an OCI index push with a config property.
 
-### _Put an OCI index by tag, linking a signature to a collection of manifests_
+> See [Artifacts submitted to a registry](https://github.com/notaryproject/nv2/blob/276abe450feec8f3b54f0774b7dfb47f36670cc5/docs/distribution/README.md#artifacts-submitted-to-a-registry) for each digest reference used in this example.
+
+### Put an OCI index by digest, linking a signature to a collection of manifests
 
 ### Request
-`PUT https://localhost:5000/v2/hello-world/manifests/signature-1`
+
+`PUT https://localhost:5000/v2/net-monitor/manifests/sha256:222ibbf80b44ce6be8234e6ff90a1ac34acbeb826903b02cfa0da11c82cb222i`
+
 ```json
 {
   "schemaVersion": 2.1,
-  "mediaType": "application/vnd.oci.image.index.v2+json",
+  "mediaType": "application/vnd.oci.image.index.v3+json",
   "config": {
     "mediaType": "application/vnd.cncf.notary.config.v2+jwt",
-    "digest": "sha256:2235d2d22ae5ef400769fa51c84717264cd1520ac8d93dc071374c1be49cc77c",
+    "digest": "sha256:222cb130c152895905abe66279dd9feaa68091ba55619f5b900f2ebed38b222c",
     "size": 1906
   },
   "manifests": [
     {
       "mediaType": "application/vnd.oci.image.manifest.v1+json",
-      "digest": "sha256:80559bf80b44ce6be8234e6ff90a1ac34acbeb826903b02cfa0da11c82cbc042",
+      "digest": "sha256:111ma2d22ae5ef400769fa51c84717264cd1520ac8d93dc071374c1be49a111m",
       "size": 7023,
       "platform": {
         "architecture": "ppc64le",
@@ -44,96 +51,83 @@ Here are some examples showing an OCI index push with a config property.
 }
 ```
 
-### _Put an OCI index by digest, linking a signature to a collection of manifests_
-
-### Request
-`PUT https://localhost:5000/v2/hello-world/manifests/sha256:90659bf80b44ce6be8234e6ff90a1ac34acbeb826903b02cfa0da11c82cbc042`
-```json
-{
-  "schemaVersion": 2.1,
-  "mediaType": "application/vnd.oci.image.index.v2+json",
-  "config": {
-    "mediaType": "application/vnd.cncf.notary.config.v2+jwt",
-    "digest": "sha256:2235d2d22ae5ef400769fa51c84717264cd1520ac8d93dc071374c1be49cc77c",
-    "size": 1906
-  },
-  "manifests": [
-    {
-      "mediaType": "application/vnd.oci.image.manifest.v1+json",
-      "digest": "sha256:80559bf80b44ce6be8234e6ff90a1ac34acbeb826903b02cfa0da11c82cbc042",
-      "size": 7023,
-      "platform": {
-        "architecture": "ppc64le",
-        "os": "linux"
-      }
-    }
-  ]
-}
-```
-
-PUT index would result in the creation of a link between the index config object `sha256:2235d2d22ae5ef400769fa51c84717264cd1520ac8d93dc071374c1be49cc77c`and the manifest `sha256:80559bf80b44ce6be8234e6ff90a1ac34acbeb826903b02cfa0da11c82cbc042`, of type `application/vnd.cncf.notary.config.v2+jwt`.
+PUT index would result in the creation of a link between the index config object `sha256:222cb130c152895905abe66279dd9feaa68091ba55619f5b900f2ebed38b222c`and the `net-monitor` manifest `sha256:111ma2d22ae5ef400769fa51c84717264cd1520ac8d93dc071374c1be49a111m`, of type `application/vnd.cncf.notary.config.v2+jwt`.
 
 ## Retrieving Signatures
+
 Signatures are just referrer metadata to a registry. Referrer metdata for a manifest can be retrieved filtered by their types. Here are some examples showing how to retrieve a list of signatures for a manifest.
 
 ### _Get a list of paginated signatures for a manifest by tag_
 
 ### Request
-`GET http://localhost:5000/v2/hello-world/manifests/v1.0/referrerMetadata?mediaType=application/vnd.cncf.notary.config.v2+jwt`
+
+`GET http://localhost:5000/v2/net-monitor/manifests/v1.0/referrerMetadata?mediaType=application/vnd.cncf.notary.config.v2+jwt`
+
+> note: the mediaType filter will move to a request header
 
 ### Response
+
+The request will return the two signatures (**wabbit-networks** & **acme-rockets**)
+
+> note: the response should be a complete oci-descriptor for each result and root reference
 
 ```json
 {
     "tag": "v1.0",
     "@nextLink": "{opaqueUrl}",
     "referrerMetadata": [
-        "sha256:2235d2d22ae5ef400769fa51c84717264cd1520ac8d93dc071374c1be49cc77c",
-        "sha256:3335d2d22ae5ef400769fa51c84717264cd1520ac8d93dc071374c1be49cc88d"
+        "sha256:222ibbf80b44ce6be8234e6ff90a1ac34acbeb826903b02cfa0da11c82cb222i",
+        "sha256:333ic0c33ebc4a74a0a554c86ac2b28ddf3454a5ad9cf90ea8cea9f9e75c333i"
     ]
 }
 ```
 
-### _Get a list of paginated signatures for a manifest by digest_
+### Get a list of paginated signatures for a manifest by digest
 
 ### Request
-`GET http://localhost:5000/v2/hello-world/manifests/sha256:80559bf80b44ce6be8234e6ff90a1ac34acbeb826903b02cfa0da11c82cbc042/referrerMetadata?mediaType=application/vnd.cncf.notary.config.v2+jwt`
+
+`GET http://localhost:5000/v2/net-monitor/manifests/sha256:111ma2d22ae5ef400769fa51c84717264cd1520ac8d93dc071374c1be49a111m/referrerMetadata?mediaType=application/vnd.cncf.notary.config.v2+jwt`
+
+> note: the mediaType filter will move to a request header
 
 ### Response
 
 ```json
 {
-    "digest": "sha256:80559bf80b44ce6be8234e6ff90a1ac34acbeb826903b02cfa0da11c82cbc042",
+    "digest": "sha256:111ma2d22ae5ef400769fa51c84717264cd1520ac8d93dc071374c1be49a111m",
     "@nextLink": "{opaqueUrl}",
     "referrerMetadata": [
-        "sha256:2235d2d22ae5ef400769fa51c84717264cd1520ac8d93dc071374c1be49cc77c",
-        "sha256:3335d2d22ae5ef400769fa51c84717264cd1520ac8d93dc071374c1be49cc88d"
+        "sha256:222ibbf80b44ce6be8234e6ff90a1ac34acbeb826903b02cfa0da11c82cb222i",
+        "sha256:333ic0c33ebc4a74a0a554c86ac2b28ddf3454a5ad9cf90ea8cea9f9e75c333i"
     ]
 }
 ```
 
 ## Implementation
+
 Let's consider an example implementation for docker distribution, backed by file storage. Say that an image already exists in the registry:
-- repository: `hello-world`
-- digest: `sha256:80559bf80b44ce6be8234e6ff90a1ac34acbeb826903b02cfa0da11c82cbc042`
+
+- repository: `net-monitor`
+- digest: `sha256:111ma2d22ae5ef400769fa51c84717264cd1520ac8d93dc071374c1be49a111m`
 - tag: `v1.0`
 
 The storage layout we're most concerned with at the moment is the repository store where the manifest link file exists. It's shown below:
 
-```
+```bash
 <root>
 └── v2
     └── repositories
-        └── hello-world
+        └── net-monitor
             └── _manifests
                 └── revisions
                     └── sha256
-                        └── 80559bf80b44ce6be8234e6ff90a1ac34acbeb826903b02cfa0da11c82cbc042
+                        └── 111ma2d22ae5ef400769fa51c84717264cd1520ac8d93dc071374c1be49a111m
                             └── link
 ```
 
 Now we push a signature blob and an OCI index that contains a config property referencing it:
-- index digest: `sha256:90659bf80b44ce6be8234e6ff90a1ac34acbeb826903b02cfa0da11c82cbc042`
+
+- index digest: `sha256:222ibbf80b44ce6be8234e6ff90a1ac34acbeb826903b02cfa0da11c82cb222i`
 - index json:
     ```json
     {
@@ -141,20 +135,20 @@ Now we push a signature blob and an OCI index that contains a config property re
         "mediaType": "application/vnd.oci.image.index.v2+json",
         "config": {
             "mediaType": "application/vnd.cncf.notary.config.v2+jwt",
-            "digest": "sha256:2235d2d22ae5ef400769fa51c84717264cd1520ac8d93dc071374c1be49cc77c",
+            "digest": "sha256:222cb130c152895905abe66279dd9feaa68091ba55619f5b900f2ebed38b222c",
             "size": 1906
         },
         "manifests": [
             {
             "mediaType": "application/vnd.oci.image.manifest.v1+json",
-            "digest": "sha256:80559bf80b44ce6be8234e6ff90a1ac34acbeb826903b02cfa0da11c82cbc042",
+            "digest": "sha256:111ma2d22ae5ef400769fa51c84717264cd1520ac8d93dc071374c1be49a111m",
             "size": 7023
             }
         ]
     }
     ```
 
-On `PUT` index to the repository `hello-world`, the index appears as a manifest revision as usual. Additionally, a link is added to the referrer metadata store of the manifest. The manifests storage layout would look as follows:
+On `PUT` index to the repository `net-monitor`, the index appears as a manifest revision as usual. Additionally, a link is added to the referrer metadata store of the manifest. The manifests storage layout would look as follows:
 
 ```
 <root>
@@ -164,19 +158,20 @@ On `PUT` index to the repository `hello-world`, the index appears as a manifest 
             └── _manifests
                 └── revisions
                     └── sha256
-                        ├── 80559bf80b44ce6be8234e6ff90a1ac34acbeb826903b02cfa0da11c82cbc042
+                        ├── 111ma2d22ae5ef400769fa51c84717264cd1520ac8d93dc071374c1be49a111m
                         │   ├── link
                         │   └── referrerMetadata
                         │       └── application/vnd.cncf.notary.config.v2+jwt
                         │           └── sha256
-                        │               └── 2235d2d22ae5ef400769fa51c84717264cd1520ac8d93dc071374c1be49cc77c
+                        │               └── 222cb130c152895905abe66279dd9feaa68091ba55619f5b900f2ebed38b222c
                         │                   └── link
-                        └── 90659bf80b44ce6be8234e6ff90a1ac34acbeb826903b02cfa0da11c82cbc042
+                        └── 222ibbf80b44ce6be8234e6ff90a1ac34acbeb826903b02cfa0da11c82cb222i
                             └── link
 ```
 
-Let's add another signature for the manifest `sha256:80559bf80b44ce6be8234e6ff90a1ac34acbeb826903b02cfa0da11c82cbc042`:
-- index digest: `sha256:007170c33ebc4a74a0a554c86ac2b28ddf3454a5ad9cf90ea8cea9f9e75a153b`
+Let's add another signature for the manifest `sha256:111ma2d22ae5ef400769fa51c84717264cd1520ac8d93dc071374c1be49a111m`:
+
+- index digest: `sha256:333ic0c33ebc4a74a0a554c86ac2b28ddf3454a5ad9cf90ea8cea9f9e75c333i`
 - index json:
   ```json
   {
@@ -184,13 +179,13 @@ Let's add another signature for the manifest `sha256:80559bf80b44ce6be8234e6ff90
     "mediaType": "application/vnd.oci.image.index.v2+json",
     "config": {
       "mediaType": "application/vnd.cncf.notary.config.v2+jwt",
-      "digest": "sha256:3335d2d22ae5ef400769fa51c84717264cd1520ac8d93dc071374c1be49cc88d",
+      "digest": "sha256:333cc44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b785c333c",
       "size": 1906
     },
     "manifests": [
       {
         "mediaType": "application/vnd.oci.image.manifest.v1+json",
-        "digest": "sha256:80559bf80b44ce6be8234e6ff90a1ac34acbeb826903b02cfa0da11c82cbc042",
+        "digest": "sha256:111ma2d22ae5ef400769fa51c84717264cd1520ac8d93dc071374c1be49a111m",
         "size": 7023
       }
     ]
@@ -207,27 +202,29 @@ The manifest storage layout would look as follows on `PUT` index:
             └── _manifests
                 └── revisions
                     └── sha256
-                        ├── 80559bf80b44ce6be8234e6ff90a1ac34acbeb826903b02cfa0da11c82cbc042
+                        ├── 111ma2d22ae5ef400769fa51c84717264cd1520ac8d93dc071374c1be49a111m
                         │   ├── link
                         │   └── referrerMetadata
                         │       └── application/vnd.cncf.notary.config.v2+jwt
                         │           └── sha256
-                        │               ├── 2235d2d22ae5ef400769fa51c84717264cd1520ac8d93dc071374c1be49cc77c
+                        │               ├── 222cb130c152895905abe66279dd9feaa68091ba55619f5b900f2ebed38b222c
                         │               │    └── link
-                        │               └── 3335d2d22ae5ef400769fa51c84717264cd1520ac8d93dc071374c1be49cc88d
+                        │               └── 333cc44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b785c333c
                         │                   └── link
-                        ├── 90659bf80b44ce6be8234e6ff90a1ac34acbeb826903b02cfa0da11c82cbc042
+                        ├── 222ibbf80b44ce6be8234e6ff90a1ac34acbeb826903b02cfa0da11c82cb222i
                         │   └── link
-                        └── 007170c33ebc4a74a0a554c86ac2b28ddf3454a5ad9cf90ea8cea9f9e75a153b
+                        └── 333ic0c33ebc4a74a0a554c86ac2b28ddf3454a5ad9cf90ea8cea9f9e75c333i
                             └── link
 ```
 
 ## Prototype
+
 Available here: https://github.com/avtakkar/distribution/tree/referrer-metadata
 
 The following steps illustrate how signatures can be stored and retrieved from a registry.
 
 ### Prerequisites
+
 - Local registry prototype instance
 - [docker-generate](https://github.com/shizhMSFT/docker-generate)
 - [nv2](https://github.com/notaryproject/nv2)
@@ -236,6 +233,7 @@ The following steps illustrate how signatures can be stored and retrieved from a
 - `python3`
 
 ### Push an image to your registry
+
 ```shell
 # Local registry
 regIp="127.0.0.1" && \
@@ -253,6 +251,7 @@ docker pull $image && \
 ```
 
 ### Generate image manifest and sign it
+
 ```shell
 # Generate self-signed certificates
 openssl req \
@@ -281,12 +280,14 @@ signatureFile="manifest-signature.jwt" && \
 ```
 
 ### Obtain manifest and signature digests
+
 ```shell
 manifestDigest="sha256:$(sha256sum $manifestFile | cut -d " " -f 1)" && \
   signatureDigest="sha256:$(sha256sum $signatureFile | cut -d " " -f 1)"
 ```
 
 ### Create an OCI index file referencing the manifest that was signed and its signature as config
+
 ```shell
 indexFile="index.json" && \
   indexMediaType="application/vnd.oci.image.index.v2+json" && \
@@ -316,11 +317,13 @@ EOF
 ```
 
 ### Obtain index digest
+
 ```shell
 indexDigest="sha256:$(sha256sum $indexFile | cut -d " " -f 1)"
 ```
 
 ### Push signature and index
+
 ```shell
 # Initiate blob upload and obtain PUT location
 configPutLocation=`curl -I -X POST -s http://$registry/v2/$repo/blobs/uploads/ | grep "Location: " | sed -e "s/Location: //;s/$/\&digest=$signatureDigest/;s/\r//"`
@@ -333,6 +336,7 @@ curl -X PUT --data-binary @"$indexFile" -H "Content-Type: $indexMediaType" "http
 ```
 
 ### Retrieve signatures of a manifest as referrer metadata
+
 ```shell
 # URL encode index config media type
 metadataMediaType=`python3 -c "import urllib.parse, sys; print(urllib.parse.quote(sys.argv[1]))" $configMediaType`
@@ -343,6 +347,7 @@ curl -s "http://$registry/v2/$repo/manifests/$manifestDigest/referrer-metadata?m
 ```
 
 ### Verify signature
+
 ```shell
 # Retrieve signature
 metadataDigest=`curl -s "http://$registry/v2/$repo/manifests/$manifestDigest/referrer-metadata?media-type=$metadataMediaType" | jq -r '.referrerMetadata[0]'` && \
