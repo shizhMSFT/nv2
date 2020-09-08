@@ -1,10 +1,11 @@
 package signature
 
 import (
-	"encoding/json"
 	"fmt"
 	"strings"
 	"time"
+
+	"github.com/docker/go/canonical/json"
 )
 
 // Scheme is a signature scheme
@@ -33,7 +34,7 @@ func (s *Scheme) RegisterVerifier(verifier Verifier) {
 
 // Sign signs claims by a signer
 func (s *Scheme) Sign(signerID string, claims Claims) (string, error) {
-	bytes, err := json.Marshal(claims)
+	bytes, err := json.MarshalCanonical(claims)
 	if err != nil {
 		return "", err
 	}
@@ -49,7 +50,7 @@ func (s *Scheme) SignRaw(signerID string, content []byte) (string, error) {
 
 	signed, sig, err := signer.Sign(EncodeSegment(content))
 	if err != nil {
-		return "", nil
+		return "", err
 	}
 
 	return strings.Join([]string{
