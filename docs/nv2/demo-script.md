@@ -1,6 +1,8 @@
-# nv2 Demo Script
+# Detailed Demo Steps
 
-The following is a summary when presenting a demo of Notary v2 - prototype-2.
+The following demonstrates the underlying details of **prototype-2**.
+
+> At this point, this is a target experience, that is still being developed.
 
 ## Demo Setup
 
@@ -28,7 +30,8 @@ Perform the following steps prior to the demo:
   ```
 - Start a local registry instance:
   ```bash
-  docker run -d -p 80:5000 --restart always --name registry notaryv2/registry:nv2-prototype-1
+  # NOTE: the nv2-prototype-2 image does not yet exist
+  docker run -d -p 80:5000 --restart always --name registry notaryv2/registry:nv2-prototype-2
   ```
 - Add a `etc/hosts` entry to simulate pushing to registry.wabbit-networks.io
   - If running on windows, _even if using wsl_, add the following entry to: `C:\Windows\System32\drivers\etc\hosts`
@@ -47,7 +50,7 @@ If iterating through the demo, these are the steps required to reset to a clean 
 - Reset the local registry:
   ```bash
   docker rm -f $(docker ps -a -q)
-  docker run -d -p 80:5000 --restart always --name registry notaryv2/registry:nv2-prototype-1
+  docker run -d -p 80:5000 --restart always --name registry notaryv2/registry:nv2-prototype-2
   ```
 - Remove the `net-monitor:v1` image:
   ```bash
@@ -58,9 +61,7 @@ If iterating through the demo, these are the steps required to reset to a clean 
   code ~/.docker/nv2.json
   ```
 
-## Demo Steps
-
-### Explain the end to end experience being presented
+## The End to End Experience
 
 ![](../../media/notary-e2e-scenarios.svg)
 
@@ -72,67 +73,49 @@ If iterating through the demo, these are the steps required to reset to a clean 
 - Wabbit Networks works with Docker Hub to get certified, to help with their customer confidence.
 - ACME Rockets will only deploy software that's been scanned and approved by the ACME Rockets security team. They know it's been approved because all approved software has been signed by the ACME Rockets security team.
 
-### Show Notary Extension
-
-To demonstrate a clean end to end experience, using the docker cli, we're using the [docker-generate][docker-generate] extension.
-
-To see the extension capabilities, review the `Management Commands:`:
-
-```bash
-docker --help
-
-Management Commands:
-  ...
-  generate*   Generate artifacts (github.com/shizhMSFT, 0.1.0)
-  nv2*        Notary V2 Signature extension (Sajay Antony, Shiwei Zhang, 0.1.0)
-
-```
-
-To see the sub commands of `nv2` and `nv2 notary`:
-
-```bash
-docker nv2 --help
-docker nv2 notary --help
-```
-
-To avoid having to type `docker nv2` each time, we'll create an alias to mask over this:
-
-```bash
-alias docker="docker nv2"
-```
-
-To avoid having to type the fully qualified registry name, we'll create an environment variable:
-
-```bash
-export image=registry.wabbit-networks.io/net-monitor:v1
-```
-
 ## Wabbit Networks Build, Sign, Promote Process
 
 Let's walk through the sequence of operations Wabbit Networks takes to build, sign and promote their software.
 
 Within the automation of Wabbit Networks, the following steps are completed:
 
+1. Build the container image
+1. Sign the container image
+1. Create an SBoM
+1. Sign the SBoM
+1. Push the image, sbom, and the associated signatures to the registry
+
+### Summary of artifacts
+
+The following graph of artifacts will be created and pushed to the registry
+
+![](./media/net-monitor-sbom-signed-detailed.svg)
+
+- the `net-monitor:v1` image
+- a wabbit-networks signature of the `net-monitor:v1` image
+- an SBoM for the `net-monitor:v1` image
+- a wabbit-networks signature of the `net-monitor:v1 sbom`
+
 ### Build the `net-monitor` image
 
-```bash
-docker build \
-    -t $image \
-    https://github.com/wabbit-networks/net-monitor.git#main
-```
+  ```bash
+  docker build \
+      -t registry.wabbit-networks.io/net-monitor:v1 \
+      https://github.com/wabbit-networks/net-monitor.git#main
+  ```
 
 ### Acquire the private key
 
 - As a best practice, we'll always build on an ephemeral client, with no previous state.
 - The ephemeral client will retrieve the private signing key from the companies secured key vault provider.
 
-These specific steps are product/cloud specific, so we'll assume these steps have been completed.
+These specific steps are product/cloud specific, so we'll assume these steps have been completed and we have the required keys.
 
-### Sign the image
+### Sign and Push
 
-Using the private key, we'll sign the net-monitor image. Note, we're signing the image with a registry name that we haven't yet pushed to. This enables offline signing scenarios. This is important as the image will eventually be published on `registry.wabbit-networks.io/`, however their internal staging and promotion process may publish to internal registries before promotion to the public registry.
+Using the private key, we'll sign the `net-monitor:v1` image. Note, we're signing the image with a registry name that we haven't yet pushed to. This enables offline signing scenarios. This is important as the image will eventually be published on `registry.wabbit-networks.io/`, however their internal staging and promotion process may publish to internal registries before promotion to the public registry.
 
-- Generate an [nv2 signature][nv2-signature], persisted locally as `net-monitor_v1.signature.config.jwt`
+- Generate an [nv2 signature][nv2-signature], persisted locally as `net-monitor_v1.signature.jwt`
 
   ```shell
   docker notary --enabled
@@ -144,80 +127,126 @@ Using the private key, we'll sign the net-monitor image. Note, we're signing the
   ```
 - view the signature referenced from docker notary sign
   ```bash
-  cat <output reference>
+  cat <output reference of docker notary sign>
   ```
 
-- View the manifest the signature is based upon:
+- Push the container image
+
   ```bash
-  docker generate manifest $image
+  docker push registry.wabbit-networks.io/net-monitor:v1
   ```
 
-### Push the image & signature to the registry
+## Generate an SBoM
 
-Push the image, and its signature in one user gesture. Note the push links the signature to the image for later retrevial by a `:tag` or `digest`.
+This demo focuses on the signing of additional content, including an SBoM. It doesn't focus on a specific SBoM format. As a result, we'll generate the most basic, and _admittedly_ useless SBoM document:
 
-```shell
-docker push $image
+```bash
+echo '{"version": "0.0.0.0", "image": "registry.wabbit-networks.io/net-monitor:v1", "contents": "good"}' > sbom_v1.json
 ```
 
-### Clear the local image
+## Push the SBoM with ORAS
 
-- To simulate another client, we'll clear out the `net-monitor:v1` image
+```bash
+  oras push registry.wabbit-networks.io/net-monitor \
+      --push-as-digest \
+      --artifact-type application/example.sbom.v0 \
+      --manifest-type application/vnd.oci.artifact.manifest.v1 \
+      --manifests registry.wabbit-networks.io/net-monitor@<net-monitor@sha252:digest> \
+      --plain-http \
+      ./sbom_v1.json
+```
+
+### Push the SBoM with Signing
+
+- For non-container images, we'll use the `nv2` cli to sign and push to a registry.
   ```bash
-  docker rmi -f registry.wabbit-networks.io/net-monitor:v1
-  rm  ~/.docker/nv2/sha256/*.*
+  nv2 sign \
+    --manifests oci://registry.wabbit-networks.io/net-monitor@sha256:1a0a0a89a \
+    --push \
+    -k ~/.ssh/wabbit-networks.key \
+    -o net-monitor_v1-sbom.signature.jwt
+
+  # view the manifest
+  cat sbom_v1-manifest.json
+
+  # view the sbom signature
+  cat <output from oras notary sign>
   ```
 
-### Validate the image
+## Pulling Validated Content
 
-To validate an image, `docker pull` with `docker notary --enabled` will attempt to validate the image, based on the local keys.
+To represent a deployed, ephemeral node, we'll pull the `net-monitor:v1` image, validating the signature of the image and the sbom.
 
-- Attempt to pull the `net-monitor:v1` image:
+### Clear the build content
+
+To simulate another client, we'll clear out the `net-monitor:v1` image and signature, simulating a new environment.
+
+> Note: The public and private keys are maintained, deferring to key management prototypes for how keys should be acquired.
+
+```bash
+docker rmi -f registry.wabbit-networks.io/net-monitor:v1
+rm *.jwt
+rm *.json
+```
+
+### Attempt, and fail to pull the image
+
+Simulate a notary enabled client, which doesn't yet have the public keys configured.
+
+- Get the digest for the `net-monitor:v1` image:
   ```bash
-  docker pull $image
-  ```
+  oras discover ... (shiwei magic)
 
-- The above command will fail, as we haven't configured the `nv2` client access to the public keys.
+  NET_MONITOR_DIGEST=$(curl -v -H "Accept: application/vnd.docker.distribution.manifest.v2+json" \
+      registry.wabbit-networks.io/v2/net-monitor/manifests/v1 2>&1 | \
+      grep -i 'Docker-Content-Digest:' | \
+      awk '{print $3}')
+  ```
+- Query for Notary v2 linked artifacts
   ```bash
-  Looking up for signatures
-  Found 1 signatures
-  2021/03/02 18:34:47 none of the signatures are valid: verification failure: x509: certificate signed by unknown authority
+  curl -v -H "Accept: artifactType=application/vnd.cncf.notary.v2" \
+    registry.wabbit-networks.io/v2/_ext/oci-artifacts/v1/net-monitor/manifests/${NET_MONITOR_DIGEST}/links
+  NET_MONITOR_SIG_DIGEST=^
   ```
-
-- Open the `nv2.json` configuration file:
+- Retrieve the `net-monitor:v1` notary v2 signature
+  ```bash
+  oras pull registry.wabbit-networks.io/net-monitor@sha256:${NET_MONITOR_SIG_DIGEST} \
+      --plain-http
+  ```
+- Validate the signature
+  ```bash
+  nv2 verify \
+    -c ./wabbit-networks.crt \
+    -f net-monitor_v1.signature.jwt \
+    oci://registry.wabbit-networks.io/net-monitor:v1
+  ```
+  The above validation will fail, as we haven't yet configured notary to find the `wabbit-networks.crt` public key.
+- Configure Notary access to the wabbit-networks key
   ```bash
   code ~/.docker/nv2.json
   ```
-
-- Add the wabbit networks public key:
+- Add the path to the cert:
   ```json
-  {
-    "enabled": true,
-    "verificationCerts": [
-      "/home/stevelas/nv2-demo/wabbit-networks.crt"
-    ]
-  }
+  "verificationCerts": [
+		"/home/stevelas/nv2-demo/wabbit-networks.crt"
+	]
+  ```
+- Validate the signature
+  ```bash
+  nv2 verify \
+    -c ./wabbit-networks.crt \
+    -f net-monitor_v1.signature.jwt \
+    oci://registry.wabbit-networks.io/net-monitor:v1
   ```
 
-- Pull the `net-monitor:v1` image, using the public key for verification:
+- Pull the image, as the signature validation succeeded
   ```bash
   docker pull $image
   ```
-- The validated pull can be seen:
-  ```bash
-  v1 digest: sha256:48575dfb9ef2ebb9d67c6ed3cfbd784d635fcfae8ec820235ffa24968b3474dc size: 527
-  Looking up for signatures
-  Found 1 signatures
-  Found valid signature: sha256:282f5475ac4788f5c0ce3c0c44995726192385c2cae85d0f04da12595707a73f
-  The image is originated from:
-  - registry.wabbit-networks.io/net-monitor:v1
-  registry.wabbit-networks.io/net-monitor@sha256:48575dfb9ef2ebb9d67c6ed3cfbd784d635fcfae8ec820235ffa24968b3474dc: Pulling from net-monitor
-  Digest: sha256:48575dfb9ef2ebb9d67c6ed3cfbd784d635fcfae8ec820235ffa24968b3474dc
-  Status: Downloaded newer image for registry.wabbit-networks.io/net-monitor@sha256:48575dfb9ef2ebb9d67c6ed3cfbd784d635fcfae8ec820235ffa24968b3474dc
-  registry.wabbit-networks.io/net-monitor@sha256:48575dfb9ef2ebb9d67c6ed3cfbd784d635fcfae8ec820235ffa24968b3474dc  
-  ```
 
-This shows the target experience we're shooting for, within various build and container runtime tooling.
-
-[nv2-signature]:    ../signature/README.md
-[docker-generate]:  https://github.com/shizhMSFT/docker-generate
+[docker-generate]:        https://github.com/shizhMSFT/docker-generate
+[nv2-signature]:          ../signature/README.md
+[oci-image-manifest]:     https://github.com/opencontainers/image-spec/blob/master/manifest.md
+[oci-image-index]:        https://github.com/opencontainers/image-spec/blob/master/image-index.md
+[oci-artifact-manifest]:  https://github.com/opencontainers/artifacts/blob/3e34f029537052639eed59b469cb6c43706ac3d0/artifact-manifest.md
+[oras]:                   https://github.com/deislabs/oras

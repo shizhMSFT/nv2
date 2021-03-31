@@ -1,0 +1,5 @@
+{
+  "version": "0.0.0.0",
+  "image": "registry.wabbit-networks.io/net-monitor:v1",
+  "contents": "good"
+}
